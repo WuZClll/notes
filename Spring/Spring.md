@@ -1,3 +1,5 @@
+[000-Spring高级49讲-导学_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1P44y1N7QG?p=1&vd_source=796ed40051b301bfa3a84ba357f4828c)的自学笔记
+
 # Spring
 
 ## 1.快速入门- BeanFactory 快速入门

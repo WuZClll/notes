@@ -1,39 +1,18 @@
-**目录**
-
-[js的三种写法](https://blog.csdn.net/qq_65286290/article/details/123807083#t0)
-
-[注释](https://blog.csdn.net/qq_65286290/article/details/123807083#t1)
-
-[输入与输出](https://blog.csdn.net/qq_65286290/article/details/123807083#t2)
-
-[变量](https://blog.csdn.net/qq_65286290/article/details/123807083#t3)
-
-[数据类型](https://blog.csdn.net/qq_65286290/article/details/123807083#t4)
-
-[ 运算符 ](https://blog.csdn.net/qq_65286290/article/details/123807083#t5)
-
-[条件语句 ](https://blog.csdn.net/qq_65286290/article/details/123807083#t6)
-
-------
-
-## js的三种写法
+## 1. js的三种引入方式
 
 **行内式，内嵌式，引入式**
 
 **html：**
 
 ```html
-		<title></title>
-		<!-- 内嵌式 -->
-		<!-- <script type="text/javascript">alert('点秋香')</script> -->
-		<!-- 引入式 -->
-		<script type="text/javascript" src="./3_14.js">
-		</script>
-		</head>
-	<body>
-		 <!-- 行内式 --><!-- onclick:点击  alert：弹出框-->
-<!-- 		 <input type="button" value="唐伯虎" onclick="alert('点秋香')" />
- -->	
+<!-- 内嵌式 -->
+<script type="text/javascript">alert('点秋香')</script>
+
+<!-- 引入式 -->
+<script type="text/javascript" src="./3_14.js"></script>
+	
+<!-- 行内式 --><!-- onclick:点击  alert：弹出框-->
+<input type="button" value="唐伯虎" onclick="alert('点秋香')"
 ```
 
 **JS ：**
@@ -42,40 +21,34 @@
 alert('点秋香')
 ```
 
+## 2. 注释
 
+单行注释以` //` 开头
 
-## 注释
+多行注释以` /* `开始，以 `*/` 结尾
 
-**单行注释以 // 开头**
-
-**多行注释以 /\* 开始，以 \*/ 结尾**
-
-## 输入与输出
+## 3. 输入与输出
 
 ```javascript
-	      	// //这是一个输入框
-			// prompt('请输入你的年龄：');
-			// //这是一个输出框
-			// alert('威海加油，疫情终将战胜');
-			// //控制台.日志(输出)，给程序员看的
-		    // console.log('程序员看的哦');
-			// var age = 18;
-			// console.log(age);
-			var apple1 = '青苹果';
-			var apple2 = '红苹果';
-			var temp;			
-			var temp = apple1;
-			var apple1 = apple2;
-			var apple2 = temp;
-			console.log(apple1,apple2)
-			//1.用户输入姓名  存储到一个myname的变量里面
-			var myname = prompt('请输入您的名字：');
-			//2.输出这个用户名
-			alert(myname);
-			
+//这是一个输入框
+prompt('请输入你的年龄：');
+
+//这是一个输出框
+alert('威海加油，疫情终将战胜');
+
+//控制台.日志(输出)，给程序员看的
+console.log('程序员看的哦');
+
+var age = 18;
+console.log(age);//18
+
+//1.用户输入姓名  存储到一个myname的变量里面
+var myname = prompt('请输入您的名字：');
+//2.输出这个用户名
+alert(myname);	
 ```
 
-## 变量
+## 4. 变量
 
 - 变量必须以字母开头
 - 变量也能以 $ 和 _ 符号开头（不过我们不推荐这么做）
@@ -83,7 +56,7 @@ alert('点秋香')
 
 JavaScript 变量有很多种类型，但是现在，我们只关注数字和字符串。 
 
-**一条语句，多个变量** 
+### 4.1 一条语句，多个变量*
 
 ```javascript
 //可以在一条语句中声明很多变量。该语句以 var 开头，并使用逗号分隔变量即可：
@@ -97,14 +70,14 @@ var x,y,z=1;
 //x,y 为 undefined， z 为 1。
 ```
 
-**未声明值的变量** 
+### 4.2 未声明值的变量
 
 ```javascript
 //声明无值的变量。未使用值来声明的变量，其值实际上是 undefined。
 var carname;
 ```
 
-**重新声明变量** 
+### 4.3 重新声明变量
 
 ```javascript
 //如果重新声明 JavaScript 变量，该变量的值不会丢失：
@@ -118,7 +91,7 @@ console.log(a);
 // 输出 'x'
 ```
 
-**使用赋值运算符给变量赋值：** 
+### 4.4 使用赋值运算符给变量赋值
 
 ```javascript
 var x = 5

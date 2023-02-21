@@ -81,7 +81,13 @@ http://www.baidu.com
 
 链接图片! [解释](图片路径)
 
+不推荐：
+
 <img src="C:\Users\^\Pictures\桌面\1.png" style="zoom:11%;"/>
+
+推荐使用这种方式引入图片：
+
+![图片](C:\Users\^\Pictures\桌面\1.png)
 
 *斜体*  ，    **加粗** ， `行内代码`  ，<u>下划线</u> :smile:，~~删除线~~ ，***加粗倾斜***
 
