@@ -797,7 +797,7 @@ class You implements Runnable {
 }
 ```
 
-### 5.  线程同步
+### 5.  线程同步（队列+锁）
 
 #### 5.1 发现问题：
 
@@ -847,15 +847,20 @@ class You implements Runnable {
     - 在多线程竞争下，加锁，释放锁会导致比较多的「上下文切换」和「调度延时」，引起性能问题(性能变慢)
     - 如果一个优先级高的线程等待一个优先级低的线程释放锁会导致**优先级倒置**，引起性能问题
 
-#### 5.3 synchronized锁的两种用法
+### 6 . synchronized锁
 
-synchronized()方法 和 synchronized块
+synchronized锁的两种用法：
+
+1. synchronized()方法
+2. synchronized块
 
 - synchronized()方法只能锁this
 - 方法里面需要修改的内容才需要锁，锁的太多会浪费资源，由此产生synchronized块
 - synchronized(Obj){}代码块可以锁任意对象，锁住的对象就是变化的对象，需要增删改的对象
 
-##### 5.3.1 synchronized()方法
+#### 6.1 synchronized()方法
+
+##### 6.1.1  详解
 
 ```java
  public synchronized void method(int args){}
@@ -866,28 +871,7 @@ synchronized()方法 和 synchronized块
 - 方法一旦执行，就独占该锁，直到该方法返回才释放锁，后面被阻塞的线程才能获得这个锁继续执行
 - 缺陷：若将一个大的方法申明为synchronized将会影响效率（不高效）
 
-##### 5.3.2 synchronized同步块
-
-```java 
-synchronized(Obj){}
-```
-
-- 产生：方法里面需要修改的内容才需要锁，锁的太多会浪费资源，由此产生synchronized块
-- Obj 就是锁住的对象，称之为「同步监视器」
-  - Obj 可以是**任何对象**，但是推荐使用共享资源作为同步监视器
-  - 锁住的对象就是变化的对象，需要增删改的对象
-  - 同步方法中无需指定同步监视器，因为同步方法的同步监视器就是this，就是这换个对象本身，或者是 class【反射中】
-- Obj「同步监视器」的执行过程
-  1. 第一个线程访问，锁定同步监视器，执行其中代码
-  2. 第二个线程访问，发现同步监视器被锁定，无法访问
-  3. 第一个线程访问完毕，解锁同步监视器
-  4. 第二个线程访问，发现同步监视器没有锁，然后锁定并访问
-
-
-
-#### 5.4 案例
-
-##### 5.4.1 买票（synchronized方法）
+##### 6.1.2 案例买票
 
 ```Java
 //不安全的买票(会出现多个线程同时发现还有1张票，并将有一张票的信息拷贝到自己内存空间，多个线程同时买这一张票，售票处票数多次--，出现负数)
@@ -932,7 +916,30 @@ class BuyTicket implements Runnable {
 }
 ```
 
-##### 5.4.2 集合添加数据(同步代码块)
+#### 6.2 synchronized同步块
+
+##### 6.2.1 详解
+
+```java 
+synchronized(Obj){}
+```
+
+- 产生：方法里面需要修改的内容才需要锁，锁的太多会浪费资源，由此产生synchronized块
+- Obj 就是锁住的对象，称之为「同步监视器」
+  - Obj 可以是**任何对象**，但是推荐使用共享资源作为同步监视器
+  - 锁住的对象就是变化的对象，需要增删改的对象
+  - 同步方法中无需指定同步监视器，因为同步方法的同步监视器就是this，就是这换个对象本身，或者是 class【反射中】
+- Obj「同步监视器」的执行过程
+  1. 第一个线程访问，锁定同步监视器，执行其中代码
+  2. 第二个线程访问，发现同步监视器被锁定，无法访问
+  3. 第一个线程访问完毕，解锁同步监视器
+  4. 第二个线程访问，发现同步监视器没有锁，然后锁定并访问
+
+
+
+##### 6.2.2 案例
+
+###### 线程不安全的集合(同步代码块)
 
 ```java
 //线程不安全的集合(两个线程在同一瞬间可能会在同一个位置添加数据，数据会被覆盖掉，也就是添加的位置不安全)
@@ -950,6 +957,675 @@ public class UnsafeList {
         }
         Thread.sleep(3000);
         System.out.println(list.size());//打印集合的元素个数，可能少于10000
+    }
+}
+```
+
+#### 6.3 案例
+
+1. [买票(synchronized方法)](#####6.1.2 案例买票)
+2. [线程不安全的集合(synchronized块)](######线程不安全的集合(同步代码块))
+3. [线程安全的集合()](#####线程安全的集合(jdk中已经写好的))
+
+##### 线程安全的集合(jdk中已经写好的)
+
+concurrent: 并发包
+
+```java
+import java.util.concurrent.CopyOnWriteArrayList;
+
+//测试JUC安全类型的集合
+public class TestJUC {
+    public static void main(String[] args) {
+        CopyOnWriteArrayList<String> list = new CopyOnWriteArrayList<String>();//线程安全的list
+        for (int i = 0; i < 10000; i++) {
+            new Thread( () -> {
+                list.add(Thread.currentThread().getName());
+            }).start();
+        }
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println(list.size());//1000
+    }
+}
+
+```
+
+### 7.  死锁
+
+#### 7.1 详情
+
+多个线程各自占有一些共享资源﹐并且互相等待其他线程占有的资源才能运行﹐而导致两个或者多个线程都在等待对方释放资源﹐都停止执行的情形，就是死锁
+
+有一些共享资源，某一个同步代码块同时拥有多个锁「两个以上不同对象的锁」就会出现死锁
+
+#### 7.2 产生死锁的四个条件
+
+- 互斥条件:一个资源每次只能被一个进程使用。
+- 请求与保持条件:一个进程因请求资源而阻塞时，对已获得的资源保持不放。
+- 不剥夺条件:进程已获得的资源，在末使用完之前，不能强行剥夺。
+- 循环等待条件:若干进程之间形成一种头尾相接的循环等待资源关系。
+
+#### 7.3 案例
+
+##### 7.3.1 解释
+
+一个人(线程)先有了镜子，他又想要口红
+一个人(线程)先有了口红，他又想要镜子
+两个人(线程)都拥有对方想要的东西(锁)，但两个对方想要的锁都被对方占有
+他们都等待对方做完自己的事后放下东西(释放锁)再去拿对方放下的东西(拿到对方释放的锁)，后去干自己的事
+而程序不会主动释放锁，只有在同步代码块执行完毕才会释放锁，但程序的执行过程中需要另一人(线程)占有的东西(锁)
+所以人(线程)会一直等待另一人(线程)完成自己要做的事，后再完成自己的事，就会一直相互等待
+
+##### 7.3.2 图示
+
+有一个镜子和一个口红：
+```mermaid
+graph LR
+a1{"镜子(对象)"}
+b2{"口红(目前在小红那儿)"}
+b1{"口红(对象)"}
+a2{"镜子(目前在小青那儿)"}
+
+f["小青(线程a)"] --> g["先拿到(锁住)"] --> b1
+b1 ..-> h["想拿到(想锁住)"]
+h ..-> a2
+a2..-> k[完成自己想做的事]..-> l["放下东西(释放资源)"]
+l..->b1
+l..->a2
+
+c["小红(线程a)"] --> d["先拿到(锁住)"] --> a1
+a1 ..-> e["想拿到(想锁住)"]
+e ..-> b2
+b2..-> i[完成自己想做的事]..-> j["放下东西(释放资源)"]
+j ..-> a1
+j..->b2
+```
+
+#### 7.4 案例代码演示
+
+##### 7.4.1 前置代码
+
+```java
+public class DeadLock {
+    public static void main(String[] args) {
+        Makeup g1 = new Makeup(0, "小青");
+        Makeup g2 = new Makeup(1, "小红");
+
+        g1.start();
+        g2.start();
+    }
+}
+//共享资源 口红和镜子
+//口红
+class Lipstick {}
+//镜子
+class Mirror {}
+
+//去化妆
+class Makeup extends Thread {
+    //口红
+    static Lipstick lipstick = new Lipstick();
+    //镜子
+    static Mirror mirror = new Mirror();
+
+    int choice;//选择
+    String girlName;//使用化妆品的人
+
+    Makeup(int choice, String girlName) {
+        this.choice = choice;
+        this.girlName = girlName;
+    }
+
+    @Override
+    public void run() {
+        //化妆
+        try {
+            makeup();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    //化妆，互相持有对方的锁，就是需要得到对方的资源
+    private void makeup() throws InterruptedException {
+        //见6.3.2及6.3.1
+    }
+}
+```
+
+##### 7.4.2 出现死锁
+
+用了同步代码块嵌套
+
+```java
+private void makeup() throws InterruptedException {
+    if (choice == 0) {
+        //锁的嵌套导致死锁
+        synchronized (lipstick) {//他拿到了口红
+            System.out.println(this.girlName + "拿到了口红");
+            Thread.sleep(1000);
+            
+            synchronized (mirror) {//他又想拿镜子
+                System.out.println(this.girlName + "拿到了镜子");
+            }
+        } else {
+            synchronized (mirror) {//他拿到了镜子
+                System.out.println(this.girlName + "拿到了镜子");
+                Thread.sleep(2000);
+
+                synchronized (lipstick) {//他又想拿口红
+                    System.out.println(this.girlName + "拿到了口红");
+                }
+            }
+        }
+    }
+```
+
+##### 7.4.3 解决死锁问题
+
+不用嵌套锁，用完一个锁立即释放
+
+```java
+    private void makeup() throws InterruptedException {
+        if (choice == 0) {
+            //不用嵌套，用完会立即释放
+            synchronized (lipstick) {//他拿到了口红
+                System.out.println(this.girlName + "拿到了口红");
+                Thread.sleep(1000);
+            }
+            synchronized (mirror) {//他又想拿镜子
+                System.out.println(this.girlName + "拿到了镜子");
+            }
+        } else {
+            synchronized (mirror) {//他拿到了镜子
+                System.out.println(this.girlName + "拿到了镜子");
+                Thread.sleep(2000);
+            }
+            synchronized (lipstick) {//他又想拿口红
+                System.out.println(this.girlName + "拿到了口红");
+            }
+        }
+    }
+```
+
+### 8. Lock锁
+
+#### 8.1 详解
+
+- 从JDK 5.0开始，Java提供了更强大的线程同步机制——通过**显式定义同步锁对象**来实现同步。同步锁使用Lock对象充当
+- java.util.concurrent.locks.Lock接口是控制多个线程对共享资源进行访问的工具。
+- 锁提供了对共享资源的独占访问，每次只能有一个线程对Lock对象加锁，线程开始访问共享资源之前应先获得Lock对象
+- ReentrantLock 类实现了Lock，它拥有与synchronized相同的并发性和内存语义，在实现线程安全的控制中，比较常用的是ReentrantLock，可以显式加锁、释放锁。
+  `private final ReentrantLock lock = new ReentrantLock();`
+
+#### 8.2 语法
+
+```java
+class A im{
+    //定义Lock锁 ReentrantLock:可重进入锁
+    private final ReentrantLock lock = new ReentrantLock();
+
+    public void m() {
+        lock.lock();//加锁
+        
+        try {
+            //保证线程安全的代码;
+        } finally {
+            //解锁
+            lock.unlock();
+            //如果同步代码有异常，要将unlock()写入finally语句块，一般将其写入就好
+        }
+    }
+}   
+```
+
+#### 8.3 synchronized 与 Lock 锁的对比
+
+- Lock是显式锁（手动开启和关闭锁，别忘记关闭锁) synchronized是隐式锁，出了作用域自动释放
+- Lock只有代码块锁，synchronized有代码块锁和方法锁
+- 使用Lock锁，JVM将花费较少的时间来调度线程，性能更好。并且具有更好的扩展性(提供更多的子类)
+- 优先使用顺序:
+  Lock >同步代码块（已经进入了方法体，分配了相应资源)>同步方法（在方法体之外)
+
+#### 8.4 案例
+
+买票
+
+```java
+package com.kuang.thread;
+
+import java.util.concurrent.locks.ReentrantLock;
+
+//测试Lock锁 可以显式的定义锁
+public class TestLock {
+    public static void main(String[] args) {
+        TestLock2 testLock2 = new TestLock2();
+
+        new Thread(testLock2).start();
+        new Thread(testLock2).start();
+        new Thread(testLock2).start();
+    }
+}
+
+class TestLock2 implements Runnable {
+    int ticketNums = 10;
+
+    //定义Lock锁 ReentrantLock:可重进入锁
+    private final ReentrantLock lock = new ReentrantLock();
+
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                lock.lock();//加锁
+                if (ticketNums > 0) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    System.out.println(ticketNums--);
+                } else {
+                    break;
+                }
+            } finally {
+                //解锁
+                lock.unlock();
+            }
+        }
+    }
+}
+```
+
+### 9.  线程协作
+
+#### 9.1 生产者消费者模式
+
+这是一个线程同步问题，生产者和消费者共享同一个资源，并且生产者和消费者之间相互依赖，互为条件．
+
+- 对于生产者，没有生产产品之前，要通知消费者等待`wait()`﹒而生产了产品之后，又需要马上通知消费者消费`notify()`
+- 对于消费者﹐在消费之后，要通知生产者已经结束消费﹐需要生产新的产品以供消费.
+- 在生产者消费者问题中,仅有synchronized是不够的
+  - synchronized可阻止并发更新同一个共享资源，实现了同步
+  - synchronized不能用来实现不同线程之间的消息传递(通信)
+
+#### 9.2 线程通信的方法
+
+Java提供了几个方法解决线程之间的通信问题
+
+- 均是Object类的方法，都只能在同步方法或者同步代码块中使用，否则会抛出异常`IIIegalMonitorStateException`
+
+| 方法名             | 作用                                                         |
+| ------------------ | ------------------------------------------------------------ |
+| wait               | 表示线程一直等待，直到其他线程通知，与sleep不同，sleep不会释放锁，wait会释放锁 |
+| wait(long timeout) | 指定等待的毫秒数                                             |
+| notify()           | 唤醒一个处于等待状态的线程                                   |
+| notifyAll()        | 唤醒同一个对象上所有调用wait()方法的线程,优先级别高的线程优先调度 |
+
+### 10. 并发协作模型"生产者/消费者模式"
+
+#### 10.1 管程法(容器)
+
+##### 10.1.1 介绍
+
+- 生产者:负责**生产**数据的模块(可能是方法﹐对象,线程﹐进程);
+- 消费者︰负责**处理**数据的模块(可能是方法﹐对象,线程,进程);
+- 缓冲区∶消费者不能直接使用生产者的数据﹐他们之间有个“缓冲区
+
+**生产者将生产好的数据放入缓冲区,消费者从缓冲区拿出数据**
+
+```mermaid
+graph LR
+a["Producer<br/>(生产者)"] --> b(数据缓冲区) --> c["Consumer</br>(消费者)"]
+```
+
+##### 10.1.2 案例
+
+```java
+package com.kuang.thread;
+
+//测试生产者消费者模型
+//利用缓冲区解决：管程法
+public class TestPC {
+    public static void main(String[] args) {
+        SynContainer container = new SynContainer();//new一个缓冲区(容器)
+
+        new Producer(container).start();//生产者
+        new Consumer(container).start();//消费者
+    }
+}
+
+//生产者
+class Producer extends Thread {
+    SynContainer container;//一个缓冲区
+
+    public Producer(SynContainer container) {
+        this.container = container;
+    }
+
+    //生产
+    @Override
+    public void run() {
+        for (int i = 0; i < 100; i++) {
+            System.out.println("生产了" + i + "号鸡");
+            container.push(new Chicken(i));
+        }
+    }
+}
+
+//消费者
+class Consumer extends Thread {
+    SynContainer container;//一个缓冲区
+
+    public Consumer(SynContainer container) {
+        this.container = container;
+    }
+
+    //消费
+    @Override
+    public void run() {
+        for (int i = 0; i < 100; i++) {
+            System.out.println("消费了" + container.pop().id + "号鸡");
+        }
+    }
+}
+
+//产品
+class Chicken {
+    int id;//产品编号
+
+    public Chicken(int id) {
+        this.id = id;
+    }
+}
+
+//缓冲区
+class SynContainer {
+    //需要一个容器大小
+    Chicken[] chickens = new Chicken[10];
+    //容器计数器
+    int count = 0;
+
+    //生产者放入产品
+    public synchronized void push(Chicken chicken) {
+        //如果容器满了，就需要等待消费者消费
+        if (count == chickens.length) {
+            //通知消费者消费，生产等待
+            try {
+                this.wait();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        //如果没有满，我们就可以丢入产品
+        chickens[count] = chicken;
+        count++;
+
+        //我们可以通知消费者消费了
+        this.notify();
+    }
+
+    //消费者消费产品
+    public synchronized Chicken pop(){
+        //判断能否消费
+        if (count == 0) {
+            //等待生产者生产，消费者等待
+            try {
+                this.wait();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        //如果可以消费
+        count--;
+        Chicken chicken = chickens[count];
+
+        //拿到了，通知生产者生产
+        this.notify();
+        return chicken;
+    }
+}
+```
+
+
+
+#### 10.2 信号灯法(标志位)
+
+##### 10.2.1 介绍
+
+设置一个标志位，当flag==true他就等待this.wait()，如果flag==false就去通知另一个人this.notifyAll()
+
+```java 
+class Test {
+    public static void main(String[] args) {
+        B b = new B();//商品
+        new A1(b).start();//生产者A1线程生产b启动
+        new A2(b).start();//消费者A2线程消费b启动
+    }
+}
+//生产者A1
+class A1 extends Thread {
+    B b;
+
+    public A1(B b) {
+        this.b = b;
+    }
+
+    @Override
+    public void run() {
+        //生产中...
+    }
+}
+//消费者A2
+class A2 extends Thread {
+    B b;
+    public A2(B b) {
+        this.b = b;
+    }
+
+    @Override
+    public void run() {
+        //消费中...
+    }
+}
+
+//产品B
+class B {
+    boolean flag = true;//T为需要生产
+
+    //生产
+    public synchronized void BA1(String newSection) {
+        if (flag != true) {//还有商品，不需要生产
+            try {
+                this.wait();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        //生产
+        //...
+        
+        //通知消费者可以消费了
+        this.notifyAll();
+        this.flag = !this.flag;
+    }
+    
+      //消费
+    public synchronized void BA2(String newSection) {
+        if (flag != true) {//没有新商品，无法消费等待生产者上架
+            try {
+                this.wait();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        //消费
+        //...
+        
+        //通知生产者生产
+        this.notifyAll();
+        this.flag = !this.flag;
+    }
+
+}
+```
+
+##### 10.2.2 案例
+
+热心作者更新发布章节，通知读者，等待读者催更，催更立即更新发布
+狂热读者阅读，读者催更，等待作者更新，更新立即阅读
+
+```java
+//信号灯法：标志位解决
+public class TestPC2 {
+    public static void main(String[] args) {
+        Book book = new Book();
+        new Writer(book).start();
+        new Reader(book).start();
+    }
+}
+
+//生产者--》作者
+class Writer extends Thread {
+    Book book;
+
+    public Writer(Book book) {
+        this.book = book;
+    }
+
+    @Override
+    public void run() {
+        for (int i = 1; i < 30; i++) {
+            this.book.play("第" + i + "章");
+        }
+    }
+}
+
+//消费者--》读者
+class Reader extends Thread {
+    Book book;
+
+    public Reader(Book book) {
+        this.book = book;
+    }
+
+    @Override
+    public void run() {
+        for (int i = 0; i < 29; i++) {
+            this.book.read();
+        }
+    }
+}
+
+//产品--》书的章节
+class Book {
+    //作者写稿，观众期待(等待)T
+    //观众阅读，作者休息(等待)F
+    String newSection;//新章节
+    boolean flag = true;//T:表示有新章节，读者可以去读了
+
+    //赶稿 生产书的章节
+    public synchronized void play(String newSection) {
+        if (flag != true) {
+            try {
+                this.wait();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        System.out.println("作者更新章节了-->" + newSection);
+        //通知观众可以阅读了
+        this.notifyAll();//唤醒
+        this.newSection = newSection;
+        this.flag = !this.flag;
+    }
+
+    //观看 消费书的章节
+    public synchronized void read() {
+        if (flag) {
+            try {
+                this.wait();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        System.out.println("读者读完新章节-->" + newSection);
+        //催更，通知作者加更
+        this.notifyAll();
+        this.flag = !this.flag;
+    }
+}
+```
+
+#### 10.3 线程池
+
+##### 10.3.1 详解
+
+1. 背景
+   经常创建和销毁、使用量特别大的资源，比如并发情况下的线程，对性能影响很大。
+
+2. 思路
+   提前创建好多个线程，放入线程池中，使用时直接获取，使用完放回池中。可以避免频繁创建销毁、实现重复利用。类似生活中的公共交通工具。
+
+3. 好处
+
+   - 提高响应速度（减少了创建新线程的时间)
+
+   - 降低资源消耗（重复利用线程池中线程，不需要每次都创建)
+
+   - 便于线程管理(…..)
+     | 变量            | 含义                                 |
+     | --------------- | ------------------------------------ |
+     | corePoolSize    | 核心池的大小                         |
+     | maximumPoolSize | 最大线程数                           |
+     | keepAliveTime   | 线程没有任务时最多保持多长时间会终止 |
+
+4. 线程池相关API: ExecutorService 和 Executors
+
+   1. ExecutorService:真正的线程池接口。常见子类ThreadPoolExecutor
+
+      - `void execute(Runnable command)`:执行任务/命令，没有返回值，一般用来执行Runnable
+      - `<T> Future<T> submit(Callable<T> task)`:执行任务，有返回值，一般用来执行Callable
+      - `void shutdown():`关闭连接池
+
+   2. Executors:工具类、线程池的工厂类，用于创建并返回不同类型的线程池
+      ```java
+      ExecutorService service = Executors.newFixedThreadPool(10);
+      ```
+
+      
+
+##### 10.3.2 代码演示
+
+```java
+public class TestPool {
+    public static void main(String[] args) {
+        //1. 创建线程池 参数为线程池大小
+        ExecutorService service = Executors.newFixedThreadPool(10);
+
+        //执行
+        service.execute(new MyThread());
+        service.execute(new MyThread());
+        service.execute(new MyThread());
+        service.execute(new MyThread());
+
+        //2. 关闭连接
+        service.shutdown();
+
+    }
+}
+
+class MyThread implements Runnable {
+    @Override
+    public void run() {
+        for (int i = 0; i < 100; i++) {
+            System.out.println(Thread.currentThread().getName() + i);
+        }
     }
 }
 ```
@@ -994,8 +1670,6 @@ lambda表达式是函数式编程
 
 ### 2.Lambda表达式的诞生
 
-#### 2.1 简化过程：
-
 ```mermaid
 graph LR
 a([1.外部类])-.实现.->b[[接口]]
@@ -1009,9 +1683,9 @@ d--简化-->e
 e--简化-->f
 ```
 
-#### 2.2 代码演示
+### 3. 代码演示
 
-##### 2.2.1 Lambda的演变
+#### 3.1 Lambda的演变
 
 ```java
 /*
@@ -1074,7 +1748,7 @@ class Like implements ILike {
 }
 ```
 
-##### 简化Lambda表达式
+#### 3.2 简化Lambda表达式
 
 ```java
 public class TestLambda2 {
@@ -1146,7 +1820,6 @@ interface Marry {
     void HappyMarry();
 }
 
-
 //真实角色，你 去结婚 真实对象和代理对象都要实现同一个接口
 //要去结婚的你类
 class You implements Marry {
@@ -1175,7 +1848,6 @@ class WeddingCompany implements Marry {
         this.target.HappyMarry();
         //结婚后
         after();
-
     }
 
     private void before() {
