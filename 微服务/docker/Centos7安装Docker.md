@@ -170,7 +170,7 @@ curl -L https://raw.githubusercontent.com/docker/compose/1.29.1/contrib/completi
 如果这里出现错误，需要修改自己的hosts文件：
 
 ```sh
-echo "199.232.68.133 raw.githubusercontent.com" >> /etc/hosts
+echo "192.168.88.130 raw.githubusercontent.com" >> /etc/hosts
 ```
 
 
