@@ -1,0 +1,2668 @@
+[002-下载并安装vue.js_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV17h41137i4/?p=2&spm_id_from=pageDriver&vd_source=796ed40051b301bfa3a84ba357f4828c)
+
+## 0. vsCode小技巧
+
+### 0.1 快速生成js代码片段
+
+1.  ![img](../MDImg/vue/2.3.2vscode小技巧.png)
+
+2.  ![img](../MDImg/vue/2.3.3vscode小技巧.png)
+
+3. ```json
+   {
+   	// Place your snippets for javascript here. Each snippet is defined under a snippet name and has a prefix, body and 
+   	// description. The prefix is what is used to trigger the snippet and the body will be expanded and inserted. Possible variables are:
+   	// $1, $2 for tab stops, $0 for the final cursor position, and ${1:label}, ${2:another} for placeholders. Placeholders with the 
+   	// same ids are connected.
+   	// Example:
+   	"Print to console": {//提示
+   		"prefix": "log",//简写形式
+   		"body": [//生成的代码片段
+   			"console.log('$1');",
+   			"$2"
+   		],
+   		"description": "Log output to console"
+   	},
+   
+   	"Create vue instance": {
+   		"prefix": "vmobj",//简写形式
+   		"body": [//生成的代码片段
+   		"const vm = new Vue({",
+           "    el : '#app',",
+           "    data : {",
+   		"        $1",
+           "    }",
+           "})",
+   		],
+   		"description": "Log output to console"
+   	},
+   }
+   ```
+
+## 1. Vue程序初体验
+
+我们可以先不去了解 Vue 框架的发展历史、Vue 框架有什么特点、Vue 是谁开发的，这些对我们编写 Vue 程序起 不到太大的作用，更何况现在说了一些特点之后，我们也没有办法彻底理解它，因此我们可以先学会用，使用一 段时间之后，我们再回头来熟悉一下 Vue 框架以及它的特点。
+
+现在你只需要知道 Vue 是一个基于 JavaScript(JS） 实现的框架。要使用它就需要先拿到 Vue 的 js 文件。
+
+### 1.1 下载vue.js
+
+从 Vue 官网（https://v2.cn.vuejs.org/）下载 vue.js 文件
+
+### 1.2 第一个 Vue 程序
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第一个Vue程序</title>
+    <!-- 安装vue：当你使用script进行Vue安装之后，上下文中就注册了一个全局变量：Vue -->
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <!-- 指定Vue实例的挂载位置。 -->
+    <div id="app"></div>
+
+    <script>
+        /* 
+        第一步：创建Vue实例
+        1. 为什么要new Vue()，直接调用Vue()函数不行吗？
+            不行，因为直接调用Vue()函数，不创建实例的话，会出现以下错误：
+                Vue is a constructor and should be called with the `new` keyword
+        2. 关于Vue构造函数的参数：options？
+            option翻译为选项
+            options翻译为多个选项
+            Vue框架要求这个options参数必须是一个纯粹的JS对象：{}
+            在{}对象中可以编写大量的key:value对。
+            一个key:value对就是一个配置项。
+            主要是通过options这个参数来给Vue实例指定多个配置项。
+        3. 关于template配置项：
+            template翻译为：模板。
+            template配置项用来指定什么？用来指定模板语句，模板语句是一个字符串形式的。
+            什么是模板语句？
+                Vue框架自己制定了一些具有特殊含义的特殊符号eg:{{}}。
+                Vue的模板语句是Vue框架自己搞的一套语法规则。
+                我们写Vue模板语句的时候，不能乱写，要遵守Vue框架的模板语法规则。
+            模板语句可以是一个纯粹的HTML代码，也可以是Vue中的特殊规则。也可以是HTML代码 + Vue的特殊规则。
+            template后面的模板语句会被Vue框架的编译器进行编译，转换成浏览器能够识别的HTML代码。
+        */
+
+        /* 
+        let options = {
+            template : '<h1>Hello Vue!!!!!</h1>'
+        }
+        const myVue = new Vue(options) 
+        */
+
+        const myVue = new Vue({
+            template : '<h1>Hello Vue!!!!!</h1>'
+        })
+
+        /* 
+        第二步：将Vue实例挂载到id='app'的元素位置。
+        1. Vue实例都有一个$mount()方法，这个方法的作用是什么？
+            将Vue实例挂载到指定位置。
+        2. #app 显然是ID选择器。这个语法借鉴了CSS。
+        */
+        myVue.$mount('#app')
+        //myVue.$mount(document.getElementById('app'))
+    </script>
+</body>
+</html>
+```
+
+### 1.3 Vue 的 data 配置项
+
+[API — Vue.js (vuejs.org)](https://v2.cn.vuejs.org/v2/api/#data)
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模板语句的数据来源</title>
+    <!-- 安装Vue -->
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <!-- 指定挂载位置 -->
+    <div id="app"></div>
+    <!-- vue程序 -->
+    <script>
+        /* 
+        模板语句的数据来源：
+            1. 谁可以给模板语句提供数据支持呢？
+                data选项。
+            2. data选项的类型是什么？
+                Object | Function （对象或者函数）
+            3. data配置项的专业叫法：
+                Vue 实例的数据对象.（data实际上是给整个Vue实例提供数据来源的。）
+            4. 如果data是对象的话，对象必须是纯粹的对象 
+                (含有零个或多个的 key/value 对)
+            5. data数据如何插入到模板语句当中？
+                {{}} 这是Vue框架自己搞的一套语法，别的框架看不懂的，浏览器也是不能够识别的。
+                Vue框架自己是能够看懂的。这种语法在Vue框架中被称为：模板语法中的插值语法。（有的人把他叫做胡子语法。）
+                怎么用？
+                    {{data的key}}
+                插值语法的小细节：
+                    {这里不能有其它字符包括空格{
+                    }这里不能有其它字符包括空格}
+            
+        */
+        new Vue({
+            template : `<h1>最近非常火爆的电视剧{{name}}，它的上映日期是{{releaseTime}}。主角是{{lead.name}}，年龄是{{lead.age}}岁。
+                其他演员包括：{{actors[0].name}}({{actors[0].age}}岁)，{{actors[1].name}}({{actors[1].age}}岁)。{{a.b.c.d.e.name}}
+                </h1>`,
+            data : {
+                name : '狂飙!!!',
+                releaseTime : '2023年1月2日',
+                lead : {
+                    name : '高启强',
+                    age : 41
+                },
+                actors : [
+                    {
+                        name : '安欣',
+                        age : 41
+                    },
+                    {
+                        name : '高启兰',
+                        age : 29
+                    }
+                ],
+                a : {
+                    b : {
+                        c : {
+                            d : {
+                                e : {
+                                    name : '呵呵'
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }).$mount('#app')
+    </script>
+</body>
+</html>
+```
+
+>以上程序执行原理
+>
+>- Vue 编译器对 template 进行编译，遇到胡子{{}}时从 data 中取数据，然后将取到的数据插到对应的位置。生成一段 HTML 代码，最终将 HTML 渲染到挂载位置，呈现。  
+>- 当 data 发生改变时，template 模板会被重新编译，重新渲染。
+
+### 1.4 Vue 的 templatie 配置项
+
+````html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>template配置项详解</title>
+    <!-- 安装Vue -->
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <!-- 指定挂载位置 -->
+    <!-- 注意：以下代码就是只有Vue框架能够看懂的代码了。下面的代码就是一个模板语句。这个代码是需要Vue框架编译，然后渲染的。 -->
+    <div id="app">
+        <div>
+            <h1>{{msg}}</h1>
+            <h1>{{name}}</h1>
+        </div>
+    </div>
+
+    <!-- vue程序 -->
+    <script>
+        // Vue.config是Vue的全局配置对象。
+        // productionTip属性可以设置是否生成生产提示信息。
+        // 默认值：true。如果是false则表示阻止生成提示信息。
+        // Vue.config.productionTip = false//可能没有效果//如果没有效果可以直接改源码vue.js productionTip = false
+
+        /* 
+        关于template配置项：
+            1.template后面指定的是模板语句，但是模板语句中只能有一个根节点。
+            2.只要data中的数据发生变化，模板语句一定会重新编译。（只要data变，template就会重新编译，重新渲染）
+            3.如果使用template配置项的话，指定挂载位置的元素会被替换。
+            4.好消息：目前我们可以不使用template来编写模板语句。这些模板语句可以直接写到html标签中。Vue框架能够找到并编译，然后渲染。
+            5.如果直接将模板语句编写到HTML标签中，指定的挂载位置就不会被替换了。
+        关于$mount('#app')？
+            也可以不使用$mount('#app')的方式进行挂载了。
+            在Vue中有一个配置项：el
+            el配置项和$mount()可以达到同样的效果。
+            el配置项的作用？
+                告诉Vue实例去接管哪个容器。
+                el : '#app'，表示让Vue实例去接管id='app'的容器。
+            el其实是element的缩写。被翻译为元素。
+        */
+        new Vue({
+            // 错误的
+            //template : '<h1>{{msg}}</h1> <h1>动力节点老杜</h1>',//这里有两个h1根节点，是错误的
+
+            // 正确的
+           /*  template : `
+            <div>
+                <h1>{{msg}}</h1>
+                <h1>{{name}}</h1>
+            </div>
+            `, */
+            // 定义的数据也可以直接在html被挂载的标签中的{{}}中引用
+            data : {
+                msg : 'Hello Vue!!!!!!!',
+                name : 'a动力节点老杜!!!!!!'
+                // vue的谷歌开发者工具插件有个小bug 数据开头一定要是非中文 不然插件无效
+            },
+            //el配置项和$mount()可以达到同样的效果。
+            el : '#app'
+            //el : document.getElementById('app')
+        })
+        //}).$mount('#app')
+        
+    </script>
+</body>
+</html>
+````
+
+### 1.5  Vue示例与容器的关系
+
+一夫一妻制
+一个容器对应一个示例
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue实例 和 容器 的关系是：一夫一妻制</title>
+    <!-- 安装Vue -->
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <!-- 准备容器(指定挂载位置) -->
+    <!-- 结果： 只有第一个.app挂载了数据 -->
+    <div class="app">
+        <h1>{{msg}}</h1>
+    </div>
+
+    <div class="app">
+        <h1>{{msg}}</h1>
+    </div>
+
+    <!-- 准备容器 -->
+    <div id="app2">
+        <h1>{{name}}</h1>
+    </div>
+
+    <!-- vue程序 -->
+    <script>
+        /* 
+            验证：一个Vue实例可以接管多个容器吗？
+                不能。一个Vue实例只能接管一个容器。一旦接管到容器之后，即使后面有相同的容器，Vue也是不管的。因为Vue实例已经“娶到媳妇”了。
+        */
+        new Vue({
+            el : '.app',
+            data : {
+                msg : 'Hello Vue!'
+            }
+        })
+
+        new Vue({
+            el : '#app2',
+            data : {
+                name : 'zhangsan'
+            }
+        })
+
+        // 这个Vue实例想去接管 id='app2'的容器，但是这个容器已经被上面那个Vue接管了。他只能“打光棍”了。
+        new Vue({
+            el : '#app2',
+            data : {
+                name : 'jackson'
+            }
+        })
+        
+    </script>
+
+
+</body>
+</html>
+```
+
+## 2. Vue 核心技术
+
+### 2.1模板语法之插值语法
+
+- 内容动态
+- {{}}
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模板语法之插值语法{{}}</title>
+    <!-- 安装Vue -->
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <!-- 
+        主要研究：{{这里可以写什么}}
+        1. 在data中声明的变量、函数等都可以。
+        2. 常量都可以。
+        3. 只要是合法的javascript表达式，都可以。
+        4. 模板表达式都被放在沙盒中，只能访问全局变量的一个白名单，如 Math 和 Date 等。
+            'Infinity,undefined,NaN,isFinite,isNaN,' 
+            'parseFloat,parseInt,decodeURI,decodeURIComponent,encodeURI,encodeURIComponent,' 
+            'Math,Number,Date,Array,Object,Boolean,String,RegExp,Map,Set,JSON,Intl,' 
+            'require'
+     -->
+    <!-- 准备容器 -->
+    <div id="app">
+        <!-- 在data中声明的 -->
+        <!-- 这里就可以看做在使用msg变量。 -->
+        <h1>{{msg}}</h1>
+        <h1>{{sayHello()}}</h1>
+        <!-- <h1>{{i}}</h1> -->
+        <!-- <h1>{{sum()}}</h1> -->
+
+        <!-- 常量 -->
+        <h1>{{100}}</h1>
+        <h1>{{'hello vue!'}}</h1>
+        <h1>{{3.14}}</h1>
+
+        <!-- javascript表达式 -->
+        <h1>{{1 + 1}}</h1>
+        <h1>{{'hello' + 'vue'}}</h1>
+        <h1>{{msg + 1}}</h1><!--变量＋数字-->
+        <h1>{{'msg' + 1}}</h1>
+        <h1>{{gender ? '男' : '女'}}</h1>
+        <h1>{{number + 1}}</h1>
+        <h1>{{'number' + 1}}</h1>
+        <h1>{{msg.split('').reverse().join('')}}</h1>
+
+        <!-- 错误的：不是表达式，这是语句。 -->
+        <!-- <h1>{{var i = 100}}</h1> -->
+
+        <!-- 在白名单里面的 -->
+        <h1>{{Date}}</h1>
+        <h1>{{Date.now()}}</h1>
+        <h1>{{Math}}</h1>
+        <h1>{{Math.ceil(3.14)}}</h1>
+
+    </div>
+
+    <!-- vue程序 -->
+    <script>
+
+        // 用户自定义的一个全局变量
+        var i = 100
+        // 用户自定义的一个全局函数
+        function sum(){
+            console.log('sum.....');
+        }
+
+        new Vue({
+            el : '#app',
+            data : {
+                number : 1,
+                gender : true,
+                msg : 'abcdef',  // 为了方便沟通，以后我们把msg叫做变量。（这行代码就可以看做是变量的声明。）
+                sayHello : function(){
+                    console.log('hello vue!');
+                }
+            }
+        })
+    </script>
+</body>
+</html>
+```
+
+### 2.2 模板语法之指令
+
+- 属性动态
+- 指令的一个完整的语法格式：
+  `<HTML标签 v-指令名:参数="javascript表达式"></HTML标签>`
+- [v-on 事件绑定指令](###2.11  Vue的事件绑定——v-on 指令)
+- [v-if条件渲染指令](####2.21.1 条件渲染 v-if)
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模板语法之指令语法 v-??? </title>
+    <!-- 安装Vue -->
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <!-- 
+        指令语法：
+            1. 什么是指令？有什么作用？
+                指令的职责是，当表达式的值改变时，将其产生的连带影响，响应式地作用于 DOM
+            2. Vue框架中的所有指令的名字都以“v-”开始。
+            3. 插值是写在标签体当中的，那么指令写在哪里呢？
+                Vue框架中所有的指令都是以HTML标签的属性形式存在的，例如：
+                    <span 指令是写在这里的>{{这里是插值语法的位置}}</span>
+                    注意：虽然指令是写在标签的属性位置上，但是这个指令浏览器是无法直接看懂的。
+                    是需要先让Vue框架进行编译的，编译之后的内容浏览器是可以看懂的。
+            4. 指令的语法规则：
+                指令的一个完整的语法格式：
+                    <HTML标签 v-指令名:参数="javascript表达式"></HTML标签>
+                    表达式：
+                        之前在插值语法中{{这里可以写什么}}，那么指令中的表达式就可以写什么。实际上是一样的。
+                        但是需要注意的是：在指令中的表达式位置不能外层再添加一个{{}}
+                    不是所有的指令都有参数和表达式：
+                        有的指令，不需要参数，也不需要表达式，例如：v-once
+                        有的指令，不需要参数，但是需要表达式，例如：v-if="表达式"
+                        有的指令，既需要参数，又需要表达式，例如：v-bind:参数="表达式"
+            5. v-once 指令
+                作用：只渲染元素一次。随后的重新渲染，元素及其所有的子节点将被视为静态内容并跳过。这可以用于优化更新性能。
+            
+            6. v-if="表达式" 指令
+                作用：表达式的执行结果需要是一个布尔类型的数据：true或者false
+                    true：这个指令所在的标签，会被渲染到浏览器当中。
+                    false：这个指令所在的标签，不会被渲染到浏览器当中。
+     -->
+    <!-- 准备一个容器 -->
+    <div id="app">
+        <h1>{{msg}}</h1>
+        <h1 v-once>{{msg}}</h1>
+        <h1 v-if="a > b">v-if测试：{{msg}}</h1>
+    </div>
+    <!-- vue程序 -->
+    <script>
+        new Vue({
+            el : '#app',
+            data : {
+                msg : 'Hello Vue!',
+                a : 10,
+                b : 11
+                // b : 9
+            }
+        })
+    </script>
+</body>
+</html>
+```
+
+#### 2.2.1 v-bind 指令详解
+
+- 编译前：
+  `<HTML标签 v-bind:参数="表达式"></HTML标签>`
+
+- 编译后：
+  `<HTML标签 参数="表达式的执行结果"></HTML标签>`
+
+- 作用
+  它可以让HTML标签的某个**属性的值产生动态的效果**
+
+- data ===> 视图单向绑定
+  
+  数据变化视图跟着变化，反之不可以
+  
+- 简写
+  只是针对v-bind提供了以下简写方法
+
+  `<img v-bind:src="imgPath"\>`简写↓
+  `<img :src="imgPath"\>`
+  `v-bind:参数="表达式"   简写为    :参数="表达式"`
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>v-bind指令详解（它是一个负责动态绑定的指令）</title>
+    <!-- 安装Vue -->
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <!-- 
+        v-bind指令详解
+            1. 这个指令是干啥的？
+                它可以让HTML标签的某个属性的值产生动态的效果。
+            2. v-bind指令的语法格式：
+                <HTML标签 v-bind:参数="表达式"></HTML标签>
+            3. v-bind指令的编译原理？
+                编译前：
+                    <HTML标签 v-bind:参数="表达式"></HTML标签>
+                编译后：
+                    <HTML标签 参数="表达式的执行结果"></HTML标签>
+                注意两项：
+                    第一：在编译的时候v-bind后面的“参数名”会被编译为HTML标签的“属性名”
+                    第二：表达式会关联data，当data发生改变之后，表达式的执行结果就会发生变化。
+                    所以，连带的就会产生动态效果。
+            4. v-bind因为很常用，所以Vue框架对该指令提供了一种简写方式：
+                只是针对v-bind提供了以下简写方式：
+                    <img :src="imgPath">
+            
+            5. 什么时候使用插值语法？什么时候使用指令？
+                凡是标签体当中的内容要想动态，需要使用插值语法。
+                只要向让HTML标签的属性动态，需要使用指令语法。
+     -->
+    <!-- 准备一个容器 -->
+    <div id="app">
+        <!-- 注意：以下代码中 msg 是变量名。 -->
+        <!-- 注意：原则上v-bind指令后面的这个参数名可以随便写。 -->
+        <!-- 虽然可以随便写，但大部分情况下，这个参数名还是需要写成该HTML标签支持的属性名。这样才会有意义。 -->
+        <span v-bind:xyz="msg"></span>
+        <!-- 编译为 <span xyz="Hello Vue!"></span> -->
+
+        <!-- 这个表达式带有单引号，这个'msg'就不是变量了，是常量。 -->
+        <span v-bind:xyz="'msg'"></span>
+        <!-- 编译为 <span xyz="msg"></span> -->
+
+        <!-- v-bind实战 -->
+        <img src="../img/1.jpg"> <br>
+        <img v-bind:src="imgPath"> <br>
+
+        <!-- v-bind简写形式 -->
+        <img :src="imgPath"> <br>
+
+        <!-- 这是一个普通的文本框 -->
+        <input type="text" name="username" value="zhangsan"> <br>
+        <!-- 以下文本框可以让value这个数据变成动态的：这个就是典型的动态数据绑定。 -->
+        <input type="text" name="username" :value="username"> <br>
+
+        <!-- 使用v-bind也可以让超链接的地址动态 -->
+        <a href="https://www.baidu.com">走起</a> <br>
+        <a :href="url">走起2</a> <br>
+
+        <!-- 不能采用以下写法吗？ -->
+        <!-- 
+            不能这样，报错了，信息如下：
+            Interpolation inside attributes has been removed. 
+            Use v-bind or the colon shorthand instead. For example, 
+            instead of <div id="{{ val }}">, use <div :id="val">
+            
+            属性内部插值这种语法已经被移除了。（可能Vue在以前的版本中是支持这种写法的，但是现在不允许了。）
+            请使用v-bind或冒号速记来代替。
+            请使用 <div :id="val"> 来代替 <div id="{{ val }}">
+
+         -->
+        <!-- <a href="{{url}}">走起3</a>  -->
+
+        <h1>{{msg}}</h1>
+
+    </div>
+    <!-- vue程序 -->
+    <script>
+        
+        // 赋值的过程就可以看做是一种绑定的过程。
+        //let i = 100
+
+        new Vue({
+            el : '#app',
+            data : {
+                msg : 'Hello Vue!',
+                imgPath : '../img/1.jpg',
+                username : 'jackson',
+                url : 'https://www.baidu.com'
+            }
+        })
+    </script>
+</body>
+</html>
+```
+
+#### 2.2.2 v-model 指令详解
+
+- v-model是双向数据绑定
+  data <===> 视图
+- v-model只能使用在表单类元素上,只为value属性绑定
+   因为表单类的元素才能给用户提供交互输入的界面
+- 简写
+  `v-model:value="表达式"  简写为    v-model="表达式"`
+
+### 2.3 MVVM 分层思想
+
+![MVVM思想](../MDImg/vue/2.3.1 MVVM模型.png)
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>初识MVVM分层思想</title>
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <!-- 
+        1. MVVM是什么？
+            M：Model（模型/数据）
+            V：View（视图）
+            VM：ViewModel（视图模型）：VM是MVVM中的核心部分。（它起到一个核心的非常重要的作用。）
+            MVVM是目前前端开发领域当中非常流行的开发思想。(一种架构模式。)
+            目前前端的大部分主流框架都实现了这个MVVM思想，例如Vue，React等。
+        2. Vue框架遵循MVVM吗？
+            虽然没有完全遵循 MVVM 模型，但是 Vue 的设计也受到了它的启发。
+            Vue框架基本上也是符合MVVM思想的。
+
+        3. MVVM模型当中倡导了Model和View进行了分离，为什么要分离？
+            假如Model和View不分离，使用最原始的原生的javascript代码写项目：
+                如果数据发生任意的改动，接下来我们需要编写大篇幅的操作DOM元素的JS代码。
+
+            将Model和View分离之后，出现了一个VM核心，这个VM把所有的脏活累活给做了，
+            也就是说，当Model发生改变之后，VM自动去更新View。当View发生改动之后，
+            VM自动去更新Model。我们再也不需要编写操作DOM的JS代码了。开发效率提高了很多。
+     -->
+     <!-- 准备容器 -->
+     <!-- View V-->
+     <div id="app">
+        姓名：<input type="text" v-model="name">
+     </div>
+
+     <!-- vue程序 -->
+     <script>
+        // ViewModel  VM
+        const vm = new Vue({
+            el : '#app',
+            // Model  M
+            data : {
+                name : 'zhangsan'
+            }
+        })
+     </script>
+</body>
+</html>
+```
+
+### 2.4 vm
+
+![MVVM思想](../MDImg/vue/2.3.4vm.png)
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>认识vm</title>
+    <!-- 安装Vue -->
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <!-- 
+        1. 通过Vue实例都可以访问哪些属性？(通过vm都可以vm. 什么。)
+            Vue实例中的属性很多，有的以 $ 开始，有的以 _ 开始。
+            所有以 $ 开始的属性，可以看做是公开的属性，这些属性是供程序员使用的。
+            所有以 _ 开始的属性，可以看做是私有的属性，这些属性是Vue框架底层使用的。一般我们程序员很少使用。
+            通过vm也可以访问Vue实例对象的原型对象上的属性，例如：vm.$delete...
+        2. 
+     -->
+    <div id="app">
+        <h1>{{msg}}</h1>
+    </div>
+    <script>
+
+        let dataObj = {
+            msg : 'Hello Vue!'
+        }
+
+        const vm = new Vue({
+            el : '#app',
+            data : dataObj
+        })
+
+        // 按说msg是dataObj对象的属性。
+        console.log('dataObj的msg', dataObj.msg);
+
+        // 为什么msg属性可以通过vm来访问呢？
+        // 这是因为Vue框架底层使用了数据代理机制。
+        // 要想搞明白数据代理机制，必须有一个基础知识点要学会：Object.defineProperty()。
+        console.log('vm的msg', vm.msg);
+       
+    </script>
+</body>
+</html>
+```
+
+### 2.5 Object.defineProperty()
+
+要想搞明白数据代理机制，必须有一个基础知识点要学会：Object.defineProperty()。
+
+ ![img](../MDImg/vue/2.3.5defineProperty.png)
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Object.defineProperty()</title>
+</head>
+<body>
+    <!-- 
+        Object.defineProperty()
+        1. 这个方法是ES5新增的。
+        2. 这个方法的作用是：给对象新增属性，或者设置对象原有的属性。
+        3. 怎么用？
+            Object.defineProperty(给哪个对象新增属性, 
+                                '新增的这个属性名叫啥',
+                                {给新增的属性设置相关的配置项key:value对})
+        4. 第三个参数是属性相关的配置项，配置项都有哪些？每个配置项的作用是啥？
+            value 配置项：给属性指定值
+            writable 配置项：设置该属性的值是否可以被修改。true表示可以修改。false表示不能修改。
+            getter方法 配置项：不需要我们手动调用的。当读取属性值的时候，getter方法被自动调用。
+                * getter方法的返回值非常重要，这个返回值就代表这个属性它的值。
+            setter方法 配置项：不需要我们手动调用的。当修改属性值的时候，setter方法被自动调用。
+                * setter方法上是有一个参数的，这个参数可以接收传过来的值。
+            注意：当配置项当中有setter和getter的时候，value和writable配置项都不能存在。
+     -->
+     <script>
+
+        // 这是一个普通的对象
+        let phone = {}
+
+        // 临时变量
+        let temp
+
+        // 给上面的phone对象新增一个color属性
+        Object.defineProperty(phone, 'color', {
+            //当配置项当中有setter和getter的时候，value和writable配置项都不能存在。
+            //value : '太空灰', //给属性指定值
+            //writable : true, //设置该属性的值是否可以被修改
+            // getter方法配置项
+            get : function(){
+                console.log('getter方法执行了@@@');
+                //return '动态'
+                //return this.color
+                return temp
+            },
+            // setter方法配置项
+            set : function(val){
+                console.log('setter方法执行了@@@',val);
+                //this.color = val
+                temp = val
+            }
+        })
+
+     </script>
+</body>
+</html>
+```
+
+### 2.6 数据代理机制
+
+- 数据代理机制
+  通过访问 代理对象的属性 来间接访问 目标对象的属性。
+-  ![img](../MDImg/vue/2.3.6数据代理机制控制台.png)
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据代理机制</title>
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+
+    <div id="app">
+        <h1>{{msg}}</h1><!--这也是个代理机制，它会调用get方法(框架给写好的)来获取vm的msg属性-->
+    </div>
+    
+    <script>
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                msg : 'Hello Vue!'
+            }
+        })
+    </script>
+
+    <!-- 
+        1. 什么是数据代理机制？
+            通过访问 代理对象的属性 来间接访问 目标对象的属性。
+            数据代理机制的实现需要依靠：Object.defineProperty()方法。
+        2. ES6新特性：
+            在对象中的函数/方法 :function 是可以省略的。
+     -->
+     <script>
+
+        // 目标对象
+        let target = {
+            name : 'zhangsan'
+        }
+
+        // 代理对象
+        let proxy = {}
+
+        // 如果要实现数据代理机制的话，就需要给proxy新增一个name属性。
+        // 注意：代理对象新增的这个属性的名字 和 目标对象的属性名要一致。
+        Object.defineProperty(proxy, 'name', {
+            // get : function(){
+            //     // 间接访问目标对象的属性
+            //     return target.name
+            // },
+            // set : function(val){
+            //     target.name = val
+            // }
+
+            get(){
+                console.log('getter方法执行了@@@@');
+                return target.name
+            },
+            set(val){
+                target.name = val
+            }
+        })
+
+        // let target = {
+        //     name : 'zhangsan'
+        // }
+
+        // const vm = new Vue({
+        //     el : '#app',
+        //     data : target
+        // })
+     </script>
+</body>
+</html>
+```
+
+### 2.7 Vue 数据代理机制对属性名的要求
+
+ ![img](../MDImg/vue/2.3.7数据代理机制对属性名的要求控制台.png)
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue数据代理机制对属性名的要求</title>
+    <!-- 安装Vue -->
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <!-- 
+        1. Vue实例不会给以_和$开始的属性名做数据代理。
+        
+        2. 为什么？
+            如果允许给_或$开始的属性名做数据代理的话。
+            vm这个Vue实例上可能会出现_xxx或$xxx属性，
+            而这个属性名可能会和Vue框架自身的属性名冲突。
+
+        3. 在Vue当中，给data对象的属性名命名的时候，不能以_或$开始。
+     -->
+    <!-- 容器 -->
+    <div id="app">
+        <h1>{{msg}}</h1><!--这也是个代理机制，它会调用vm的get方法(框架给写好的)来获取msg属性，在控制台可以Vue实例.msg获取它的值（vm.msg）-->
+    </div>
+    <!-- vue程序 -->
+    <script>
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                msg : 'Hello Vue!',
+                _name : 'zhangsan',
+                $age : 20
+            }
+        })
+    </script>
+</body>
+</html>
+```
+
+### 2.8 手写vue框架——数据代理
+
+`myvue.js`
+
+```javascript
+// 定义一个Vue类
+class Vue {
+    // 定义构造函数
+    // options是一个简单的纯粹的JS对象：{}
+    // options对象中有一个data配置项
+    constructor(options){
+        // 获取所有的属性名
+        Object.keys(options.data).forEach((propertyName, index) => {
+            //console.log(typeof propertyName, propertyName, index)
+            let firstChar = propertyName.charAt(0)
+            if(firstChar != '_' && firstChar != '$'){
+                Object.defineProperty(this, propertyName, {
+                    get(){
+                        return options.data[propertyName]
+                    },
+                    set(val){
+                        options.data[propertyName] = val
+                    }
+                })
+            }
+        })
+        // 获取所有的方法名
+        Object.keys(options.methods).forEach((methodName, index) => {
+            // 给当前的Vue实例扩展一个方法
+            this[methodName] = options.methods[methodName]
+        })
+    }
+}
+
+```
+
+html:
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>手写Vue框架数据代理的实现</title>
+    <!-- 安装我们自己的Vue -->
+    <script src="../js/myvue.js"></script>
+    <!-- 安装Vue -->
+    <!-- <script src="../js/vue.js"></script> -->
+</head>
+<body>
+    <!-- 容器 -->
+    <!-- <div id="app">
+        <h1>{{msg}}</h1>
+    </div> -->
+
+    <!-- Vue代码 -->
+    <script>
+        // const vm = new Vue({
+        //     el : '#app',
+        //     data : {
+        //         msg : 'Hello Vue!',
+        //         name : 'jackson',
+        //         age : 30
+        //     }
+        // })
+
+        const vm = new Vue({
+            data : {
+                msg : 'Hello Vue!',
+                _name : 'jackson',
+                $age : 30
+            }
+        })
+    </script>
+</body>
+</html>
+```
+
+### 2.9  解读Vue框架源代码
+
+![img](../MDImg/vue/2.9.1 解读Vue框架源代码控制台.png)
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>解读Vue框架源代码</title>
+    <!-- 安装Vue -->
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <!-- 
+        Vue框架源代码中关键性代码：
+        1. var data = vm.$options.data;
+            注意：这是获取data。程序执行到这里的时候vm上还没有 _data 属性。
+        2. data = vm._data = isFunction(data) ? getData(data, vm) : data || {};
+            程序执行完这个代码之后，vm对象上多了一个_data这样的属性。
+            通过以上源码解读，可以得知data不一定是一个{}，也可以是一个函数。
+            代码含义：
+                如果data是函数，则调用getData(data, vm)来获取data。
+                如果data不是函数，则直接将data返回，给data变量。并且同时将data赋值给vm._data属性了。
+            有一个疑问？
+                程序执行到这里，为什么要给vm扩展一个_data属性呢？
+                    _data属性，以"_"开始，足以说明，这个属性是人家Vue框架底层需要访问的。
+                    Vue框架底层它使用vm._data这个属性干啥呢？
+                        vm._data是啥？
+                            vm._data 是：{
+                                            name : 'jackson',
+                                            age : 35
+                                        }
+                vm._data 这个属性直接指向了底层真实的data对象。通过_data访问的name和age是不会走数据代理机制的。
+                通过vm._data方式获取name和age的时候，是不会走getter和setter方法的。
+            
+            注意：对于Vue实例vm来说，不仅有_data这个属性，还有一个$data这个属性。
+                   _data 是框架内部使用的，可以看做私有的。
+                   $data 这是Vue框架对外公开的一个属性，是给我们程序员使用。
+
+        3. 重点函数：
+            function isReserved(str) {
+                var c = (str + '').charCodeAt(0);
+                return c === 0x24 || c === 0x5f;
+            }
+            这个函数是用来判断字符串是否以 _ 和 $ 开始的。
+            true表示以_或$开始的。
+            false表示不是以_或$开始的。
+        4. proxy(vm, "_data", key);
+            通过这行代码直接进入代理机制（数据代理）。
+        5. 重点函数proxy
+            function proxy(target, sourceKey, key) { // target是vm，sourceKey是"_data"，key是"age"
+                sharedPropertyDefinition.get = function proxyGetter() {
+                    return this["_data"]["age"];
+                };
+                sharedPropertyDefinition.set = function proxySetter(val) {
+                    this["_data"]["age"] = val;
+                };
+                Object.defineProperty(vm, 'age', sharedPropertyDefinition);
+            }
+     -->
+     
+    <!-- 容器 -->
+    <div id="app">
+        <h1>姓名：{{name}}</h1>
+        <h1>年龄：{{age}}岁</h1>
+    </div>
+
+    <!-- vue代码 -->
+    <script>
+        //源码中的，判断是否以_或$开始
+        function isReserved(str) {
+            var c = (str + '').charCodeAt(0);
+            return c === 0x24 || c === 0x5f;
+        }
+
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                name : 'jackson',
+                age : 35
+            }
+        })
+
+        // 如果我们程序员不想走代理的方式读取data，想直接读取data当中的数据，可以通过_data和$data属性来访问。
+        // 建议使用$data这个属性。
+        console.log('name = ' + vm.$data.name)
+        console.log('age = ' + vm.$data.age)
+        
+    </script>
+</body>
+</html>
+```
+
+### 2.10 data 是一个函数
+
+![img](../MDImg/vue/2.10.1data是一个函数.png)
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>data也可以是一个函数</title>
+    <!-- 安装Vue -->
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <!-- 容器 -->
+    <div id="app">
+        <h1>{{msg}}</h1>
+    </div>
+    <!-- vue代码 -->
+    <script>
+        const vm = new Vue({
+            el : '#app',
+            // data : {
+            //     msg : 'Hello Vue!'
+            // }
+            // 报错：data functions should return an object：data函数应该返回一个对象。
+            // data 也可以是一个函数。
+
+            // 如果是函数的话，必须使用return语句返回{}对象。
+            // data可以是直接的对象，也可以是一个函数，什么时候使用直接的对象？什么时候使用函数呢？（等你学到组件的时候自然就明白了。）
+            // data : function(){
+            //     return {
+            //         msg : 'Hello Vue!'
+            //     }
+            // }
+
+            // 在对象当中，函数的 :function 可以省略
+            data(){
+                return {
+                    msg : 'Hello Zhangsan!'
+                }
+            }
+        })
+
+        /*
+        源码：
+        var sharedPropertyDefinition = {
+            enumerable: true,
+            configurable: true,
+            get: noop,
+            set: noop
+        };      
+        */
+        // 关于配置项：enumerable、configurable
+        let phone = {
+            name : '苹果X'
+        }
+
+        // 给phone对象新增一个color属性
+        Object.defineProperty(phone, 'color', {
+            value : '奶奶灰',
+            
+            // true表示该属性是可以遍历的。（可枚举的，可迭代的。）
+            // false表示该属性是不可遍历的。
+            enumerable : false,
+
+            // true表示该属性是可以被删除的。
+            // false表示该属性是不可以被删除的。
+            configurable : true
+        })
+
+    </script>
+</body>
+</html>                                       
+```
+
+### 2.11  Vue的事件绑定——v-on 指令
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue的事件绑定</title>
+    <!-- 安装Vue -->
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <!-- 
+        Vue事件处理:
+            1.指令的语法格式：
+                <标签 v-指令名:参数名="表达式">{{插值语法}}</标签>
+                “表达式”位置都可以写什么？
+                    常量、JS表达式、Vue实例所管理的XXX
+            2. 在Vue当中完成事件绑定需要哪个指令呢？
+                v-on指令。
+                语法格式：
+                    v-on:事件名="表达式"
+                例如：
+                    v-on:click="表达式" 表示当发生鼠标单击事件之后，执行表达式。
+                    v-on:keydown="表达式" 表示当发生键盘按下事件之后，执行表达式。
+            3. 在Vue当中，所有事件所关联的回调函数，需要在Vue实例的配置项methods中进行定义。
+                methods是一个对象：{}
+                在这个methods对象中可以定义多个回调函数。
+            4. v-on指令也有简写形式
+                v-on:click 简写为 @click
+                v-on:keydown 简写为 @keydown
+                v-on:mouseover 简写为 @mouseover
+                ....
+            5. 绑定的回调函数，如果函数调用时不需要传递任何参数，小括号()可以省略。
+            6. Vue在调用回调函数的时候，会自动给回调函数传递一个对象，这个对象是：当前发生的事件对象。
+            7. 在绑定回调函数的时候，可以在回调函数的参数上使用 $event 占位符，Vue框架看到这个 $event 占位符之后，会自动将当前事件以对象的形式传过去。
+     -->
+    <!-- 容器 -->
+    <div id="app">
+        <h1>{{msg}}</h1>
+        <!-- 使用javascript原生代码如何完成事件绑定。 -->
+        <button onclick="alert('hello')">hello</button>
+
+        <!-- 使用Vue来完成事件绑定 -->
+        <!-- 以下是错误的，因为alert()并没有被Vue实例管理。 -->
+        <!-- <button v-on:click="alert('hello')">hello</button> -->
+
+        <!-- 以下是错误的，因为sayHello()并没有被Vue实例管理。 -->
+        <!-- <button v-on:click="sayHello()">hello</button> -->
+
+        <!-- 正确的写法 -->
+        <button v-on:click="sayHello2()">v-on:click hello</button>
+        <!-- v-on指令的简写形式 -->
+        <button @click="sayHi1()">hi() button</button>
+        <!-- 绑定的回调函数，如果不需要传任何参数，小括号() 可以省略 -->
+        <button @click="sayHi1">hi button</button>
+
+        <!--$event click事件对象-->
+        <button @click="sayHi($event, 'jack')">hi button2</button>
+        <!-- 绑定的回调函数，如果不需要传任何参数，小括号() 可以省略 -->
+        <button @click="sayWhat">what button</button>
+    </div>
+    <!-- vue代码 -->
+    <script>
+        // 自定义一个函数
+        // function sayHello(){
+        //     alert('hello')
+        // }
+
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                msg : 'Vue的事件绑定'
+            },
+            methods : {
+                // 回调函数
+                // sayHello : function(){
+                //     alert('hello')
+                // }
+                // : function 可以省略
+                sayHello2(){
+                    alert('hello2')
+                },
+                sayHi1(){
+                    alert("hi1")
+                },
+                sayHi2(event, name){
+                    console.log(name, event)
+                    //alert("hi " + name)
+                },
+                sayWhat(event){
+                    console.log(event)//事件对象
+                    console.log(event.target)//事件对象的html代码
+                    console.log(event.target.innerText)//事件对象按钮上的文本
+                    alert('what...')
+                }
+            }
+        })
+    </script>
+</body>
+</html>
+```
+
+### 2.12 事件回调函数中的 this
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>关于事件回调函数中的this</title>
+    <!-- 安装Vue -->
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <!--
+        对于普通函数来说，this就是vue实例
+        对于箭头函数来说，this就是window
+            箭头函数中没有this，箭头函数中的this是从父级作用域当中继承过来的。
+            对于当前程序来说，父级作用域是全局作用域:window
+
+    -->
+    <!-- 容器 -->
+    <div id="app">
+        <h1>{{msg}}</h1>
+        <h1>计数器：{{counter}}</h1>
+        <button @click="counter++">点击我加1</button>
+        <button @click="add">点击我加1</button>
+        <button @click="add2">点击我加1（箭头函数）</button>
+    </div>
+    <!-- vue代码 -->
+    <script>
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                msg : '关于事件回调函数中的this',
+                counter : 0
+            },
+            // 1.methods对象中的方法可以通过vm去访问吗？可以。
+            // 2.methods对象中的方法有没有做数据代理呢？没有。
+            methods : {
+                add(){
+                    //counter++; // 错误的。
+                    // 在这里需要操作counter变量？怎么办？
+                    //console.log(vm === this)
+                    //console.log(this)
+                    //这个this就是vue实例
+                    this.counter++;
+                    //vm.counter++;
+                },
+                add2:()=>{
+                    //this.counter++;
+                    //console.log(this === vm)
+                    //箭头函数中没有this，箭头函数中的this是从父级作用域当中继承过来的。
+                    //对于当前程序来说，父级作用域是全局作用域:window
+                    console.log(this)
+                },
+                sayHi(){
+                    alert('hi...')
+                }
+            }
+        })
+
+    </script>
+</body>
+</html>
+```
+
+### 2.13 methods 的实现原理
+
+```js
+// 定义一个Vue类
+class Vue {
+    // 定义构造函数
+    // options是一个简单的纯粹的JS对象：{}
+    // options对象中有一个data配置项
+    constructor(options){
+        // 获取所有的属性名
+        Object.keys(options.data).forEach((propertyName, index) => {
+            //console.log(typeof propertyName, propertyName, index)
+            let firstChar = propertyName.charAt(0)
+            if(firstChar != '_' && firstChar != '$'){
+                Object.defineProperty(this, propertyName, {
+                    get(){
+                        return options.data[propertyName]
+                    },
+                    set(val){
+                        options.data[propertyName] = val
+                    }
+                })
+            }
+        })
+        // 获取所有的方法名
+        Object.keys(options.methods).forEach((methodName, index) => {
+            // 给当前的Vue实例扩展一个方法
+            this[methodName] = options.methods[methodName]
+        })
+    }
+}
+```
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>methods实现原理</title>
+    <!-- 引入我们自己的vue.js -->
+    <script src="../js/myvue.js"></script>
+</head>
+<body>
+    <!-- vue程序 -->
+    <script>
+        const vm = new Vue({
+            data : {
+                msg : 'hello vue!'
+            },
+            methods : {
+                sayHi(){
+                    //console.log(this === vm)
+                    console.log(this.msg)
+                    //alert('hi')
+                },
+                sayHello(){
+                    alert('hello')
+                },
+                sayWhat : () => {
+                    //console.log(this === vm)
+                    console.log(this)
+                }
+            }
+        })
+        
+    </script>
+</body>
+</html>
+```
+
+### 2.14 事件修饰符
+
+Vue事件修饰符是一种语法糖，用于在处理DOM事件时添加特殊功能。Vue提供了以下事件修饰符：
+
+1. .stop：阻止事件冒泡。
+
+2. .prevent：阻止默认事件。
+
+3. .capture：事件捕获模式。
+
+4. .self：只有在事件触发的元素是当前元素时才触发事件。
+
+5. .once：只触发一次事件。
+
+6. .passive：告诉浏览器不要阻止事件的默认行为，可以提高页面的性能。
+
+7. .native：监听组件根元素的原生事件。
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>事件修饰符</title>
+    <!-- 安装Vue -->
+    <script src="../js/vue.js"></script>
+    <style>
+        .divList{
+            width: 300px;
+            height: 200px;
+            background-color: aquamarine;
+            overflow: auto;
+        }
+        .item{
+            width: 300px;
+            height: 200px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 
+        Vue当中提供的事件修饰符：
+        .stop ： 停止事件冒泡，等同于 event.stopPropagation()。
+        .prevent ： 等同于 event.preventDefault() 阻止事件的默认行为。
+        .capture ：添加事件监听器时使用事件捕获模式
+                    添加事件监听器包括两种不同的方式：
+                        一种是从内到外添加。（事件冒泡模式）
+                        一种是从外到内添加。（事件捕获模式）
+        .self ：这个事件如果是“我自己元素”上发生的事件，这个事件不是别人给我传递过来的事件，则执行对应的程序。
+        .once ： 事件只发生一次
+        .passive ：passive翻译为顺从/不抵抗。无需等待，直接继续（立即）执行事件的默认行为。
+                    .passive 和 .prevent 修饰符是对立的。不可以共存。（如果一起用，就会报错。）
+                    .prevent：阻止事件的默认行为。
+                    .passive：解除阻止。
+     -->        
+    <!-- 容器 -->
+    <div id="app">
+        <h1>{{msg}}</h1>
+
+        阻止事件的默认行为
+        <a href="https://www.baidu.com" @click.prevent="yi">百度</a> <br><br>
+
+        停止事件冒泡
+        <div @click="san">
+            <div @click.stop="er">
+                <button @click="yi">事件冒泡</button>
+            </div>
+        </div>
+
+        <br><br>
+
+        添加事件监听器时使用事件捕获模式
+        <div @click.capture="san">
+            <!-- 这里没有添加.capture修饰符，以下这个元素，以及这个元素的子元素，都会默认采用冒泡模式。 -->
+            <div @click="er">
+                <button @click="yi">添加事件监听器的时候采用事件捕获模式</button>
+            </div>
+        </div>
+        
+        <br>
+        <br>
+        .self修饰符
+        <div @click="san">
+            <div @click.self="er">
+                <!-- 点击这个按钮时会弹出1到2时这个事件并不是在2元素这儿发生的，不会弹出2，直接到3 -->
+                <button @click="yi">self修饰符</button>
+            </div>
+        </div>
+
+        <br>
+        <br>
+
+        在Vue当中，事件修饰符是可以多个联合使用的。
+            但是需要注意：
+                @click.self.stop：先.self，再.stop
+                @click.stop.self：先.stop，再.self
+        <div @click="san">
+            <div @click="er">
+                <button @click.self.stop="yi">self修饰符</button>
+            </div>
+        </div>
+
+        <br>
+        <br>
+        .once修饰符：事件只发生一次，之后再点击无效
+        <button @click.once="yi">事件只发生一次</button>
+
+        <br>
+        .passive修饰符
+        <!-- 鼠标滚动事件 -->
+        <!-- 如果滚动事件被阻止，滚动时滚动条不变化 -->
+        <!-- 优先事件的默认行为执行，不管前面有什么，先变化滚动条 -->
+        <div class="divList" @wheel.passive="testPassive">
+            <div class="item">div1</div>
+            <div class="item">div2</div>
+            <div class="item">div3</div>
+        </div>
+
+    </div>
+    <!-- vue代码 -->
+    <script>
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                msg : '事件修饰符'
+            },
+            methods : {
+                yi(event){
+                    //alert('去百度！！！!!!')
+                    // 手动调用事件对象的preventDefault()方法，可以阻止事件的默认行为。
+                    //event.preventDefault();
+
+                    // 在Vue当中，这种事件的默认行为可以不采用手动调用DOM的方式来完成，可以使用事件修饰符:prevent。
+                
+                    alert(1)
+                },
+                er(){
+                    alert(2)
+                },
+                san(){
+                    alert(3)
+                },
+                testPassive(event){
+                    for(let i = 0; i < 1000; i++){
+                        console.log('test passive' + i)
+                    }
+                    // 阻止事件的默认行为
+                    // event.preventDefault()
+                }
+            }
+        })
+    </script>
+</body>
+</html>
+```
+
+### 2.15 按键修饰符
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>按键修饰符</title>
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <!-- 
+        9个比较常用的按键修饰符：
+			.enter：响应回车键事件
+			.tab：响应Tab键事件（必须配合keydown事件使用。）
+			.delete：响应删除键事件 (捕获“删除”和“退格”键)
+			.esc：响应Esc键事件
+			.space：响应空格键事件
+			.up：响应上方向键事件
+			.down：响应下方向键事件
+			.left：响应左方向键事件
+			.right：响应右方向键事件
+        怎么获取某个键的按键修饰符？
+            第一步：通过event.key获取这个键的真实名字。
+            第二步：将这个真实名字以kebab-case风格进行命名。
+                PageDown是真实名字。经过命名之后：page-down
+        按键修饰符是可以自定义的？
+            通过Vue的全局配置对象config来进行按键修饰符的自定义。
+            语法规则：
+                Vue.config.keyCodes.按键修饰符的名字 = 键值
+        系统修饰键：4个比较特殊的键
+            ctrl、alt、shift、meta（win、mac……键）
+            对于keydown事件来说：只要按下ctrl键，keydown事件就会触发。
+            对于keyup事件来说：需要按下ctrl键，并且加上按下组合键，然后松开组合键之后，keyup事件才能触发。
+     -->
+    <div id="app">
+        <h1>{{msg}}</h1>
+        回车键@keyup.enter：<input type="text" @keyup.enter="getInfo"><br>
+        回车键（键值）@keyup.13：<input type="text" @keyup.13="getInfo"><br>
+        delete键：<input type="text" @keyup.delete="getInfo"><br>
+        esc键：<input type="text" @keyup.esc="getInfo"><br>
+        space键：<input type="text" @keyup.space="getInfo"><br>
+        up键：<input type="text" @keyup.up="getInfo"><br>
+        down键：<input type="text" @keyup.down="getInfo"><br>
+        left键：<input type="text" @keyup.left="getInfo"><br>
+        right键：<input type="text" @keyup.right="getInfo"><br>
+        tab键无法触发keyup事件。只能触发keydown事件。<br>
+        tab键： <input type="text" @keyup.tab="getInfo"><br>
+        tab键（keydown）： <input type="text" @keydown.tab="getInfo"><br>
+
+        PageDown键： <input type="text" @keyup.page-down="getInfo"><br>
+        自定义按键<br>
+        huiche键： <input type="text" @keyup.huiche="getInfo"><br>
+        ctrl键(keydown)： <input type="text" @keydown.ctrl="getInfo"><br>
+        <!-- 松开ctrl+任何键都可以 -->
+        ctrl键(keyup)： <input type="text" @keyup.ctrl="getInfo"><br>
+        <!-- 只有松开ctrl+i才可以 -->
+        ctrl键(keyup)： <input type="text" @keyup.ctrl.i="getInfo"><br>
+    </div>
+
+    <script>
+
+        // 自定义了一个按键修饰符：.huiche 。代表回车键。
+        Vue.config.keyCodes.huiche = 13
+
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                msg : '按键修饰符'
+            },
+            methods : {
+                getInfo(event){
+                    // 当用户键入回车键的时候，获取用户输入的信息。
+                    //if(event.keyCode === 13){
+                        console.log(event.target.value)//输的值
+                    //}
+                    console.log(event.key)//键的真实名字
+                }
+            }
+        })
+    </script>
+</body>
+</html>
+```
+
+### 2.16 计算属性 computed——反转字符串案例
+
+#### 2.16.1 反转v1.0
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>反转字符串</title>
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <div id="app">
+        <h1>{{msg}}</h1>
+        v-model双向绑定
+        输入的信息：<input type="text" v-model="info"> <br>
+        <!-- 
+            三个问题：
+                1. 可读性差。
+                2. 代码没有得到复用。
+                3. 难以维护。
+         -->
+         <!-- 将info按空字符串拆分，然后反转，然后以空字符串拼接 -->
+        反转的信息：{{info.split('').reverse().join('')}} <br>
+        反转的信息：{{info.split('').reverse().join('')}} <br>
+        反转的信息：{{info.split('').reverse().join('')}} <br>
+        反转的信息：{{info.split('').reverse().join('')}} <br>
+        反转的信息：{{info.split('').reverse().join('')}} <br>
+    </div>
+    <script>
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                msg : '计算属性-反转字符串案例',
+                info : ''
+            }
+        })
+    </script>
+</body>
+</html>
+```
+
+#### 2.16.2 反转v2.0
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>反转字符串methods实现</title>
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <div id="app">
+        <h1>{{msg}}</h1>
+        输入的信息：<input type="text" v-model="info"> <br>
+        <!-- 在插值语法中可以调用方法，小括号不能省略。这个方法需要是Vue实例所管理的。 -->
+        反转的信息：{{reverseInfo()}} <br>
+        反转的信息：{{reverseInfo()}} <br>
+        反转的信息：{{reverseInfo()}} <br>
+        反转的信息：{{reverseInfo()}} <br>
+    </div>
+    <script>
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                msg : '计算属性-反转字符串案例',
+                info : ''
+            },
+            methods : {
+                // 反转信息的方法
+                reverseInfo(){
+                    console.log('@')//输入一次会在上面调用很多次这个方法，效率低
+                    return this.info.split('').reverse().join('');
+                }
+            }
+        })
+    </script>
+</body>
+</html>
+```
+
+#### 2.16.3 反转3.0计算属性
+
+![img](../MDImg/vue/2.16计算属性.png)
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>反转字符串计算属性实现</title>
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <!-- 
+        计算属性：
+        1. 什么是计算属性？
+            使用Vue的原有属性，经过一系列的运算/计算，最终得到了一个全新的属性，叫做计算属性。
+            Vue的原有属性: data对象当中的属性可以叫做Vue的原有属性。
+            全新的属性: 表示生成了一个新的属性，和data中的属性无关了，新的属性也有自己的属性名和属性值。
+            计算属性不能通过vue实例.$data.属性 或 vue实例._data.属性 来调用
+                    可以通过vue实例.属性获取
+		   计算属性是有缓存机制的
+        2. 计算属性怎么用？
+            语法格式：需要一个新的配置项 computed
+                computed : {
+                    // 这是一个计算属性
+                    计算属性1 : {
+                        // setter 和 getter方法。
+                        // 在computed中：
+						当第一次读取计算属性1的值的时候，getter方法被自动调用。
+						或之后再读取计算属性1，读取之前set方法绑定的data值发生变化就会执行get方法
+                        get(){
+                        },
+                        // 当修改计算属性1的值的时候，setter方法被自动调用。
+                        set(val){
+                        }
+                    },
+                    // 这是另一个计算属性
+                    计算属性2 : {},
+				  // 简写形式：set不需要的时候。
+				  计算属性3(){
+  					  return ...,
+				  }
+                }
+        3. 计算属性的作用？
+            代码得到了复用。
+            代码更加便于维护了。
+            代码的执行效率高了。
+     -->
+    <div id="app">
+        <h1>{{msg}}</h1>
+        输入的信息：<input type="text" v-model="info"> <br>
+        反转的信息：{{reversedInfo}}<br><!--计算属性调用时不能加 () -->
+        反转的信息：{{reversedInfo}}<br>
+        反转的信息：{{reversedInfo}}<br>
+        反转的信息：{{reversedInfo}}<br>
+        反转的信息：{{reversedInfo}}<br>
+        {{hehe}} <br><!--普通函数 ()可加可不加-->
+        {{hehe}} <br>
+        {{hehe}} <br>
+        {{hehe}} <br>
+        {{hehe}} <br>
+        {{hello()}} <br>
+        {{hello()}} <br>
+        {{hello()}} <br>
+        {{hello()}} <br>
+        {{hello()}} <br>
+    </div>
+    <script>
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                msg : '计算属性-反转字符串案例',
+                info : ''
+            },
+            methods : {
+                hello(){
+                    console.log('hello方法执行了')
+                    return 'hello'
+                }
+            },
+            computed : {//(有缓存机制)
+                // 可以定义多个计算属性
+                hehe : {
+                    // get方法的调用时机包括两个
+                    // 第一个时机：第一次访问这个属性的时候。
+                    // 第二个时机：该计算属性所关联的Vue原有属性的值发生变化时，getter方法会被重新调用一次。
+                    get(){
+                        console.log('getter方法调用了')
+                        // console.log(this === vm)
+                        return 'haha' + this.info
+                    },
+                    // 不能使用箭头函数，使用箭头函数会导致this的指向是：window
+                    // get:()=>{
+                    //     console.log('getter方法调用了')
+                    //     console.log(this === vm)
+                    //     return 'haha'
+                    // },
+                    set(val){
+                        console.log('setter方法调用了')
+                        // console.log(this === vm)
+                    }
+                },
+                // 完整写法
+                reversedInfo : { 
+                    get(){
+                        return this.info.split('').reverse().join('')
+                    },
+                    // 当修改计算属性的时候，set方法被自动调用。
+                    set(val){
+                        //console.log('setter方法被调用了。')
+                        // 不能这么做，这样做就递归了。
+                        //this.reversedInfo = val
+                        // 怎么修改计算属性呢？原理：计算属性的值变还是不变，取决于计算属性关联的Vue原始属性的值。
+                        // 也就是说：reversedInfo变还是不变，取决于info属性的值变不变。
+                        // 本质上：修改计算属性，实际上就是通过修改Vue的原始属性来实现的。
+                        this.info = val.split('').reverse().join('')
+                    }
+                } 
+
+                // 简写形式：set不需要的时候。
+                reversedInfo(){ 
+                    return this.info.split('').reverse().join('')
+                }
+            }
+        })
+    </script>
+</body>
+</html>
+```
+
+### 2.17 侦听属性的变化——watch
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>侦听/监视 属性的变化</title>
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <div id="app">
+        <h1>{{msg}}</h1>
+        数字：<input type="text" v-model="number"><br>
+        数字：<input type="text" v-model="a.b"><br>
+        数字：<input type="text" v-model="a.c"><br>
+        数字：<input type="text" v-model="a.d.e.f"><br>
+        数字(后期添加监视)：<input type="text" v-model="number2"><br>
+    </div>
+    <script>
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                number2 : 0,
+                msg : '侦听属性的变化',
+                number : 0,
+                // a属性中保存的值是一个对象的内存地址。
+                // a = 0x2356
+                a : {
+                    b : 0,
+                    c : 0,
+                    d : {
+                        e : {
+                            f : 0
+                        }
+                    }
+                }
+            },
+            computed : {
+                hehe(){
+                    return 'haha' + this.number
+                }
+            },
+            watch : {
+                // 可以监视多个属性
+                // 监视哪个属性，请把这个属性的名字拿过来即可。
+                // 可以监视Vue的原有属性
+                /* number : {
+                    // 初始化的时候，调用一次handler方法。
+                    immediate : true,
+                    // 这里有一个固定写死的方法，方法名必须叫做：handler
+                    // handler方法什么时候被调用呢？当被监视的属性发生变化的时候，handler就会自动调用一次。
+                    // handler方法上有两个参数：第一个参数newValue，第二个参数是oldValue
+                    // newValue是属性值改变之后的新值。
+                    // oldValue是属性值改变之前的旧值。
+                    handler(newValue, oldValue){
+                        console.log(newValue, oldValue)
+                        // this是当前的Vue实例。
+                        // 如果该函数是箭头函数，这个this是window对象。不建议使用箭头函数。
+                        console.log(this)
+                    }
+                }, */
+
+                // 无法监视b属性，因为b属性压根不存在。
+                /* b : {  
+                    handler(newValue, oldValue){
+                        console.log('@')
+                    } 
+                } */
+                
+                // 如果监视的属性具有多级结构，一定要添加单引号：'a.b'
+                 'a.b' : {  
+                    handler(newValue, oldValue){
+                        console.log('@a.b')
+                    } 
+                },
+
+                'a.c' : {  
+                    handler(newValue, oldValue){
+                        console.log('@a.c')
+                    } 
+                }, 
+
+                a : {//监视a属性
+                    // 启用深度监视，默认是不开启深度监视的。
+                    // 什么时候开启深度监视：当你需要监视一个具有多级结构的属性，并且监视所有的属性，需要启用深度监视。
+                    deep : true,  //开启深度监视
+
+                    handler(newValue, oldValue){
+                        console.log('@')
+                    } 
+                },
+
+                // 注意：监视某个属性的时候，也有简写形式，什么时候启用简写形式？
+                // 当只有handler回调函数的时候，可以使用简写形式。
+                number(newValue, oldValue){
+                    console.log(newValue, oldValue)
+                }
+
+                // 也可以监视计算属性
+                /* hehe : {
+                    handler(a , b){
+                        console.log(a, b)
+                    }
+                } */
+            }
+        })
+
+        // 如何后期添加监视？调用Vue相关的API即可。
+        // 语法：vm.$watch('被监视的属性名', {})
+        /* vm.$watch('number2', {
+            immediate : true,
+            deep : true,
+            handler(newValue, oldValue){
+                console.log(newValue, oldValue)
+            }
+        }) */
+
+        // 这是后期添加监视的简写形式。
+        vm.$watch('number2', function(newValue, oldValue){
+            console.log(newValue, oldValue)
+        })
+
+    </script>
+</body>
+</html>
+```
+
+### 2.18 watch监听属性和conputed计算属性——比较大小案例
+
+#### 2.18.1 比较大小的案例watch实现
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>比较大小的案例watch实现</title>
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <div id="app">
+        <h1>{{msg}}</h1>
+        数值1：<input type="number" v-model="num1"><br>
+        数值2：<input type="number" v-model="num2"><br>
+        比较大小：{{compareResult}}
+    </div>
+    <script>
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                msg : '比较大小的案例',
+                num1 : 0,
+                num2 : 0,
+                compareResult : ''
+            },
+            watch : {
+                // 监视num1
+                num1 : {
+                    immediate : true,//刚开始就执行handler
+                    /* handler(newValue, oldValue){
+                        console.log(newValue, oldValue)
+                    } */
+                    handler(val){//这个val是newValue
+                        //console.log(val)
+                        let result = val - this.num2
+                        // 这个箭头函数也不是Vue管理的。是javascript引擎负责管理的。调用这个箭头函数的还是window。
+                        // 箭头函数没有this，只能向上一级找this，上一级是num1，num1是Vue实例的属性，所以this是Vue实例。
+                        setTimeout(() => {
+                            console.log(this)
+                            if(result == 0){
+                                this.compareResult = val + ' = ' + this.num2
+                            }else if(result > 0){
+                                this.compareResult = val + ' > ' + this.num2
+                            }else {
+                                this.compareResult = val + ' < ' + this.num2
+                            }    
+                        }, 1000 * 3)
+                        
+                    }
+                },
+                // 监视num2
+                num2 : {//这个val是newValue
+                    immediate : true,//刚开始就执行handler
+                    /* handler(newValue, oldValue){
+                        console.log(newValue, oldValue)
+                    } */
+                    handler(val){
+                        //console.log(val)
+                        let result = this.num1 - val
+                        /* setTimeout(() => {
+                            // 虽然这个函数是箭头函数，但是this是Vue实例。
+                            console.log(this)
+                            if(result == 0){
+                                this.compareResult = this.num1 + ' = ' + val
+                            }else if(result > 0){
+                                this.compareResult = this.num1 + ' > ' + val
+                            }else {
+                                this.compareResult = this.num1 + ' < ' + val
+                            }    
+                        }, 1000 * 3) */
+
+                        // 这里虽然是普通函数，但是这个函数并不是Vue管理的。是window负责调用的。
+                        // 所以这个普通函数当中的this是window。
+                        setTimeout(function(){
+                            // 虽然这个函数是普通函数，但是this是window。
+                            console.log(this)
+                            if(result == 0){
+                                this.compareResult = this.num1 + ' = ' + val
+                            }else if(result > 0){
+                                this.compareResult = this.num1 + ' > ' + val
+                            }else {
+                                this.compareResult = this.num1 + ' < ' + val
+                            }    
+                        }, 1000 * 3)
+                        
+                    }
+                }
+
+            }
+        })
+    </script>
+</body>
+</html>
+```
+
+#### 2.18.2 比较大小的案例computed实现
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>比较大小的案例computed实现</title>
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <!-- 
+        1. computed和watch如果都能够完成某个功能，优先选择computed。
+        2. 有一种情况下，必须使用watch，computed无法完成！
+            如果在程序当中采用了异步的方式，只能使用watch。
+        3. 什么时候使用箭头函数？什么时候使用普通函数？
+            看看这个函数是否属于Vue管理的。
+            是Vue管理的函数：统一写普通函数。
+            不是Vue管理的函数：统一写箭头函数。
+     -->
+    <div id="app">
+        <h1>{{msg}}</h1>
+        数值1：<input type="number" v-model="num1"><br>
+        数值2：<input type="number" v-model="num2"><br>
+        比较大小：{{compareResult}}
+    </div>
+    <script>
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                msg : '三秒后比较大小的案例(异步，无法实现)',
+                num1 : 0,
+                num2 : 0
+            },
+            computed : {
+                // 计算属性的简写形式
+
+                compareResult(){
+                    let result = this.num1 - this.num2
+                    /*           
+                        if(result == 0){
+                            return this.num1 + ' = ' + this.num2
+                        }else if(result > 0){
+                            return  this.num1 + ' > ' + this.num2
+                        }else {
+                            return  this.num1 + ' < ' + this.num2
+                        }    
+                    } 
+                    */
+
+                    // 这里采用了异步方式,用户输入三秒后再比较大小，
+                    //     这里的箭头函数是javascript引擎去调用。所以最终return的时候，也会将值返回给javascript引擎。
+                    //     这是不可以的
+                    setTimeout(() => {
+                        if(result == 0){
+                            return this.num1 + ' = ' + this.num2
+                        }else if(result > 0){
+                            return  this.num1 + ' > ' + this.num2
+                        }else {
+                            return  this.num1 + ' < ' + this.num2
+                        }    
+                    }, 1000 * 3) // X
+                }
+            }
+        })
+    </script>
+</body>
+</html>
+```
+
+### 2.19 Class绑定
+
+操作元素的 class 列表和内联样式是数据绑定的一个常见需求。
+因为它们都是 attribute，所以我们可以用 `v-bind` 处理它们：
+只需要通过表达式计算出字符串结果即可。不过，字符串拼接麻烦且易错。
+因此，在将 `v-bind` 用于 `class` 和 `style` 时，Vue.js 做了专门的增强。表达式结果的类型除了字符串之外，还可以是对象或数组。
+
+#### 2.19.1 Class绑定之字符串形式
+
+- 适用场景：如果确定动态绑定的样式个数只有1个，但是名字不确定。
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class绑定之字符串形式</title>
+    <script src="../js/vue.js"></script>
+    <style>
+        .static{
+            border: 1px solid black;
+            background-color: aquamarine;
+        }
+        .big{
+            width: 200px;
+            height: 200px;
+        }
+        .small{
+            width: 100px;
+            height: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>{{msg}}</h1>
+        <!-- 静态写法 -->
+        <div class="static small">{{msg}}</div>
+        <br><br>
+        <button @click="changeBig">变大</button>
+        <button @click="changeSmall">变小</button>
+        <!-- 动态写法：动静都有 -->
+        <!-- 适用场景：如果确定动态绑定的样式个数只有1个，但是名字不确定。 -->
+        <!-- <div class="static" v-bind:class="c1">{{msg}}</div> -->
+        <div class="static" :class="c1">{{msg}}</div>
+    </div>
+    </div>
+    <script>
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                msg : 'Class绑定之字符串形式',
+                c1 : 'small'
+            },
+            methods: {
+                changeBig(){
+                    this.c1 = 'big'
+                },
+                changeSmall(){
+                    this.c1 = 'small'
+                }
+            },
+        })
+    </script>
+</body>
+</html>
+```
+
+#### 2.19.2Class绑定之数组形式
+
+- 适用场景：当样式的个数不确定，并且样式的名字也不确定的时候，可以采用数组形式。
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class绑定之数组形式</title>
+    <script src="../js/vue.js"></script>
+    <style>
+        .static {
+            border: 1px solid black;
+            width: 100px;
+            height: 100px;
+        }
+        .active {
+            background-color: green;
+        }
+        .text-danger {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>{{msg}}</h1>
+        <!-- 静态写法 -->
+        <div class="static active text-danger">{{msg}}</div>
+        <br>
+        <!-- 动态写法：动静结合 -->
+        <div class="static" :class="['active','text-danger']">{{msg}}</div>
+        <br>
+        <div class="static" :class="[c1, c2]">{{msg}}</div>
+        <br>
+        <!-- 适用场景：当样式的个数不确定，并且样式的名字也不确定的时候，可以采用数组形式。 -->
+        <div class="static" :class="classArray">{{msg}}</div>
+
+    </div>
+    <script>
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                msg : 'Class绑定之数组形式',
+                c1 : 'active',
+                c2 : 'text-danger',
+                classArray : ['active', 'text-danger']
+            }
+        })
+    </script>
+</body>
+</html>
+```
+
+#### 2.19.3 Class绑定之对象形式
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class绑定之对象形式</title>
+    <script src="../js/vue.js"></script>
+    <style>
+        .static {
+            border: 1px solid black;
+            width: 100px;
+            height: 100px;
+        }
+        .active {
+            background-color: green;
+        }
+        .text-danger {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>{{msg}}</h1>
+        <!-- 动态写法：动静结合 -->
+        <!-- 对象形式的适用场景：样式的个数是固定的，样式的名字也是固定的，但是需要动态的决定样式用还是不用。 -->
+        <div class="static" :class="classObj">{{msg}}</div>
+        <br>
+        <div class="static" :class="{active:true,'text-danger':false}">{{msg}}</div>
+    </div>
+    <script>
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                msg : 'Class绑定之对象形式',
+                classObj : {
+                    // 该对象中属性的名字必须和样式名一致。
+                    //属性名字的单引号可以省，但是text-danger不能省，因为它有“-”符号
+                    active : false,
+                    'text-danger' : true
+                }
+            }
+        })
+    </script>
+</body>
+</html>
+```
+
+### 2.20 Style绑定
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Style绑定</title>
+    <script src="../js/vue.js"></script>
+    <style>
+        .static {
+            border: 1px solid black;
+            width: 100px;
+            height: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>{{msg}}</h1>
+        <!-- 静态写法 -->
+        <div class="static" style="background-color: green;">{{msg}}</div>
+        <br>
+        <!-- 动态写法：字符串形式 -->
+        <div class="static" :style="myStyle">{{msg}}</div>
+        <br>
+        <!-- 动态写法：对象形式
+        在对象里属性要用大驼峰，值加单引号 -->
+        <div class="static" :style="{backgroundColor: 'gray'}">{{msg}}</div>
+        <br>
+        <div class="static" :style="styleObj1">{{msg}}</div>
+        <br>
+        <!-- 动态写法：数组形式 -->
+        <div class="static" :style="styleArray">{{msg}}</div>
+    </div>
+    <script>
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                msg : 'Style绑定',
+                myStyle : 'background-color: gray;',
+                styleObj1 : {
+                    backgroundColor: 'green'
+                },
+                styleArray : [
+                    {backgroundColor: 'green'},
+                    {color : 'red'}
+                ]
+            }
+        })
+    </script>
+</body>
+</html>
+```
+
+### 2.21 条件渲染 
+
+#### 2.21.1 条件渲染 v-if
+
+`v-if`如果为`false`直接删除这个dom元素
+
+```html
+    <title>条件渲染</title>
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <div id="app">
+        <h1>{{msg}}</h1>
+        <!-- 
+            v-if指令的值：true/false
+                true: 表示该元素会被渲染到页面上。
+                false: 表示该元素不会被渲染到页面上。（注意：不是修改了CSS样式，是这个元素压根没有加载）
+         -->
+        <div v-if="false">{{msg}}</div>
+
+        <div v-if="2 === 1">{{msg}}</div>
+
+        <button @click="counter++">点我加1</button>
+
+        <h3>{{counter}}</h3>
+
+        <!-- 奇数显示 -->
+        <img :src="imgPath1" v-if="counter % 2 === 1">
+
+        <!-- 提醒：v-if和v-else之间不能断开。 -->
+        <!-- <div></div> -->
+        <!-- 多了这个div下面的else就会报错else缺少if -->
+
+        <!-- <img :src="imgPath2" v-if="counter % 2 === 0"> -->
+        <!-- 为了提高效率，可以使用v-else指令 -->
+        <!-- 否则(不是奇数)显示这个 -->
+        <img :src="imgPath2" v-else>
+
+        <br><br>
+
+        温度：<input type="number" v-model="temprature"><br><br>
+
+        <!-- 天气：<span v-if="temprature <= 10">寒冷</span>
+        <span v-if="temprature > 10 && temprature <= 25">凉爽</span>
+        <span v-if="temprature > 25">炎热</span> -->
+
+        天气：<span v-if="temprature <= 10">寒冷</span>
+        <!-- v-if v-else-if v-else三者在使用的时候，中间不能断开。 -->
+        <!-- <br> -->
+        <span v-else-if="temprature <= 25">凉爽</span>
+        <span v-else>炎热</span>
+
+        <br><br><br>
+
+        <!-- 
+            v-show指令是通过修改元素的CSS样式的display属性来达到显示和隐藏的。
+            v-if和v-show应该如何选择？
+                1. 如果一个元素在页面上被频繁的隐藏和显示，建议使用v-show，因为此时使用v-if开销比较大。
+                2. v-if的优点：页面加载速度快，提高了页面的渲染效率。
+         -->
+        <div v-show="false">你可以看到我吗？</div>
+
+        <!-- template标签/元素只是起到占位的作用，不会真正的出现在页面上，也不会影响页面的结构。 -->
+        <template v-if="counter === 10">
+            <input type="text">
+            <input type="checkbox">
+            <input type="radio">            
+        </template>
+
+    </div>
+    <script>
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                msg : '条件渲染',
+                counter : 1,
+                imgPath1 : '../img/1.jpg',
+                imgPath2 : '../img/2.jpg',
+                temprature : 0
+            }
+        })
+    </script>
+```
+
+#### 2.21.2 条件渲染 v-show 和 v-if与template标签
+
+另一个用于根据条件展示元素的选项是 `v-show` 指令。用法大致一样：
+
+```html
+<h1 v-show="ok">Hello!</h1>
+```
+
+不同的是带有 `v-show` 的元素始终会被渲染并保留在 DOM 中。`v-show` 只是简单地切换元素的 CSS property `display`。
+
+注意，`v-show` 不支持 `<template>` 元素，也不支持 `v-else`。
+
+```html
+<!-- 
+            v-show指令是通过修改元素的CSS样式的display属性来达到显示和隐藏的。
+            v-if和v-show应该如何选择？
+                1. 如果一个元素在页面上被频繁的隐藏和显示，建议使用v-show，因为此时使用v-if开销比较大。
+                2. v-if的优点：页面加载速度快，提高了页面的渲染效率。
+         -->
+        <div v-show="false">你可以看到我吗？</div>
+
+        <!-- template标签/元素只是起到占位的作用，不会真正的出现在页面上，也不会影响页面的结构。 -->
+        <template v-if="counter === 10">
+            <input type="text">
+            <input type="checkbox">
+            <input type="radio">            
+        </template>
+
+```
+
+### 2.22 列表渲染 v-for
+
+1. v-for要写在循环项上。
+2. v-for的语法规则：
+   - v-for="(变量名,index) in/of 数组"
+   - 变量名 代表了 数组中的每一个元素
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>列表渲染</title>
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <div id="app">
+        <h1>{{msg}}</h1>
+
+        <h2>遍历对象的属性</h2>
+        <ul>
+            <li v-for="(value, propertyName) of user">
+                {{propertyName}},{{value}}
+            </li>
+        </ul>
+
+        <h2>遍历字符串</h2>
+        <ul>
+            <li v-for="(c,index) of str">
+                {{index}},{{c}}
+            </li>
+        </ul>
+
+        <h2>遍历指定的次数</h2>
+        <ul>
+            <li v-for="(num,index) of counter">
+                {{index}}, {{num}}
+            </li>
+        </ul>
+
+
+        <h2>遍历数组</h2>
+        <!-- 静态列表 -->
+        <ul>
+            <li>张三</li>
+            <li>李四</li>
+            <li>王五</li>
+        </ul>
+
+        <!-- 动态列表 -->
+        <ul>
+            <!-- 
+                1. v-for要写在循环项上。
+                2. v-for的语法规则：
+                    v-for="(变量名,index) in/of 数组"
+                    变量名 代表了 数组中的每一个元素
+             -->
+            <li v-for="fdsafds in names">
+                {{fdsafds}}
+            </li>
+        </ul>
+
+
+        <ul>
+            <li v-for="name of names">
+                {{name}}
+            </li>
+        </ul>
+
+        
+        <ul>
+            <li v-for="(name,index) of names">
+                {{name}}-{{index}}
+            </li>
+        </ul>
+
+        <ul>
+            <li v-for="(vip,index) of vips">
+                会员名：{{vip.name}}，年龄：{{vip.age}}岁
+            </li>
+        </ul>
+
+        <table>
+            <tr>
+                <th>序号</th>
+                <th>会员名</th>
+                <th>年龄</th>
+                <th>选择</th>
+            </tr>
+            <tr v-for="(vip,index) in vips">
+                <td>{{index+1}}</td>
+                <td>{{vip.name}}</td>
+                <td>{{vip.age}}</td>
+                <td><input type="checkbox"></td>
+            </tr>
+        </table>
+    </div>
+    <script>
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                msg : '列表渲染',
+                names : ['jack','lucy','james'],
+                vips : [
+                    {id:'111',name:'jack',age:20},
+                    {id:'222',name:'lucy',age:30},
+                    {id:'333',name:'james',age:40}
+                ],
+                user : {
+                    id : '111',
+                    name : '张三',
+                    gender : '男'
+                },
+                str : '动力节点',
+                counter : 10
+            }
+        })
+    </script>
+</body>
+</html>
+```
+

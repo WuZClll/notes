@@ -4,7 +4,7 @@
 
 ![相对布局](../MDImg/Android Studio/1.12 相对布局-父控件.png)
 
-## 下拉选项spinner
+## 2. 下拉选项spinner
 
 ```java
 package com.example.myapplication;
@@ -104,4 +104,108 @@ startActivityForResult(intent1,1);//跳转到页面
 ## 4. 生命周期方法及调用
 
 ![生命周期](../MDImg/Android Studio/4.1生命周期.png)
+
+## 5. ListView控件及数据初始化
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+<!--    listview应用-->
+    <ListView
+        android:id="@+id/listview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+    />
+</LinearLayout>
+```
+
+```java
+package com.example.studypower;
+
+import android.os.Bundle;
+import android.view.View;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
+import android.widget.Toast;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+public class MainActivityScore extends AppCompatActivity {
+    ListView listView;
+    String[] major;
+    private ArrayList datas;
+    int[] image;
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_score);
+        init();
+    }
+    private  void init() {
+        //文本数据
+        major = new String[]{"软件技术", "计算机应用技术", "通信技术", "大数据技术"};
+        //图片数据
+        image = new int[]{R.drawable.diqiu,R.drawable.huoxing,R.drawable.jinxing,R.drawable.shuixing};
+        
+        listView = findViewById(R.id.listview);
+
+        //准备数据
+        datas = new ArrayList();
+
+        for (int i = 0; i < major.length; i++) {
+            //一个列表项添加一个map
+		   //	map内有两个数据 图片和字符串
+            HashMap data = new HashMap();
+            data.put("image", image[i]);
+            data.put("text", major[i]);
+            //list集合内放map列表项
+            datas.add(data);
+        }
+        /**
+         * 创建适配器
+         * 适配器的作用：
+         *      它把数据放到列表项布局的相应控件上
+         * @Param context:上下文对象 MainActivityScore对象
+         * @Param resource:只能是TestView
+         */
+//        ArrayAdapter adapter = new ArrayAdapter(MainActivityScore.this, android.R.layout.simple_expandable_list_item_1,major);
+
+        /**
+         * 简单适配器
+         * @Param context:上下文对象 MainActivityScore对象
+         * @Param data: 列表项数据
+         *        List<? extends Map<String, ?>> data:
+         *           list集合内放map<String, ?>对象,
+         *           Map集合放每一个列表项里的数据
+         *           eg:
+         *              map <第一项是一个图片,第二项是一个字符串>
+         *              map <key,value>
+         *               有多少个列表项就有多少个键值对
+         * @Param resource: 列表项布局资源id
+         * @Param from：把哪个数据放到哪个控件上
+         *        String[] from：这个数组里放map的键
+         * @Param to: 布局中的控件id
+         *        int[] to:这个数组放控件id
+         * >注：第四个参数中的元素要跟第五个参数数组中的元素一一对应
+         * 源码
+         *     public SimpleAdapter(Context context, List<? extends Map<String, ?>> data,
+         *                              int resource, String[] from, int[] to) {
+         *         throw new RuntimeException("Stub!");
+         *     }
+         */
+        SimpleAdapter adapter1 = new SimpleAdapter(MainActivityScore.this, datas,
+                R.layout.item_list, new String[]{"image","text"}, new int[]{R.id.iv_icon,R.id.tv_name});
+        //设置到ListView
+        listView.setAdapter(adapter1);
+    }
+}
+```
 
