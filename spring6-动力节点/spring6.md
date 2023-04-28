@@ -5895,29 +5895,32 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className Test
- * @since 1.0
- **/
 public class Test {
     public static void main(String[] args) throws Exception {
+        // 目前只知道一个包的名字，扫描这个包下所有的类，当这个类上有@Component注解的时候，实例化该对象，然后放到Map集合中。
         // 存放Bean的Map集合。key存储beanId。value存储Bean。
         Map<String,Object> beanMap = new HashMap<>();
 
         String packageName = "com.powernode.bean";
+        
+        // . 这个正则表达式代表任意字符。这里的"."必须是一个普通的"."字符。不能是正则表达式中的"."
+        // 在正则表达式当中怎么表示一个普通的"."字符呢？使用 \. 正则表达式代表一个普通的 . 字符。
+        // 在java语言中也要\也要转义，用两个\表示一个\
         String path = packageName.replaceAll("\\.", "/");
         URL url = ClassLoader.getSystemClassLoader().getResource(path);
         File file = new File(url.getPath());
         File[] files = file.listFiles();
         Arrays.stream(files).forEach(f -> {
+            //f.name=xxx.class
             String className = packageName + "." + f.getName().split("\\.")[0];
             try {
                 Class<?> clazz = Class.forName(className);
+                // 判断类上是否有这个注解
                 if (clazz.isAnnotationPresent(Component.class)) {
+                    // 获取注解
                     Component component = clazz.getAnnotation(Component.class);
                     String beanId = component.value();
+                    // 有这个注解的都要创建对象
                     Object bean = clazz.newInstance();
                     beanMap.put(beanId, bean);
                 }
@@ -5932,8 +5935,7 @@ public class Test {
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665543007882-24036142-350b-4209-bb20-46a61e35716d.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_17%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十二.Ioc注解式开发/12.2.1执行结果.png" alt="img" style="zoom:80%;" />
 
 ## 12.2 声明Bean的注解
 
@@ -5959,6 +5961,8 @@ import java.lang.annotation.Target;
 public @interface Component {
     String value();
 }
+```
+```java
 package org.springframework.stereotype;
 
 import java.lang.annotation.Documented;
@@ -5973,11 +5977,13 @@ import org.springframework.core.annotation.AliasFor;
 @Documented
 @Component
 public @interface Controller {
-    @AliasFor(
+    @AliasFor(//这个是Component的别名
         annotation = Component.class
     )
     String value() default "";
 }
+```
+```java
 package org.springframework.stereotype;
 
 import java.lang.annotation.Documented;
@@ -5992,11 +5998,13 @@ import org.springframework.core.annotation.AliasFor;
 @Documented
 @Component
 public @interface Service {
-    @AliasFor(
+    @AliasFor(//这个是Component的别名
         annotation = Component.class
     )
     String value() default "";
 }
+```
+```java
 package org.springframework.stereotype;
 
 import java.lang.annotation.Documented;
@@ -6011,7 +6019,7 @@ import org.springframework.core.annotation.AliasFor;
 @Documented
 @Component
 public @interface Repository {
-    @AliasFor(
+    @AliasFor(//这个是Component的别名
         annotation = Component.class
     )
     String value() default "";
@@ -6029,8 +6037,7 @@ public @interface Repository {
 - dao类上使用：Repository
 
 他们都是只有一个value属性。value属性用来指定bean的id，也就是bean的名字。
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665545099269-ebd7e446-bc2f-4442-89b8-3f513e546a8b.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_21%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十二.Ioc注解式开发/12.2.2执行结果.png" alt="img" style="zoom:80%;" />
 
 ## 12.3 Spring注解的使用
 
@@ -6043,9 +6050,8 @@ public @interface Repository {
 
 **第一步：加入aop的依赖**
 
-我们可以看到当加入spring-context依赖之后，会关联加入aop的依赖。所以这一步不用做。
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665545268001-e3fb24f3-6688-4f52-a8c7-7c3084fa10a2.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_12%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+我们可以看到当加入spring-context依赖之后，会关联加入aop的依赖。所以这一步不用做.
+ <img src="../MDImg/spring6-动力节点/IMG/十二.Ioc注解式开发/12.3.1执行结果.png" alt="img" style="zoom:80%;" />
 
 **第二步：在配置文件中添加context命名空间**
 
@@ -6069,6 +6075,14 @@ public @interface Repository {
        xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
                            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+    <!--给Spring框架指定要扫描哪些包中的类-->
+    <!--<context:component-scan base-package="com.powernode.spring6.bean"/>-->
+
+    <!--多个包，使用逗号隔开。-->
+    <!--<context:component-scan base-package="com.powernode.spring6.bean,com.powernode.spring6.dao"/>-->
+
+    <!--多个包，也可以指定这多个包共同的父包，但是这肯定要牺牲一部分效率。-->
+    <!--<context:component-scan base-package="com.powernode.spring6"/>-->
     <context:component-scan base-package="com.powernode.spring6.bean"/>
 </beans>
 ```
@@ -6106,8 +6120,7 @@ public class AnnotationTest {
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665545669944-c067eacb-f65b-45ab-b68b-2320647cdfb4.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_15%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十二.Ioc注解式开发/12.3.2执行结果.png" alt="img" style="zoom:80%;" />
 
 **如果注解的属性名是value，那么value是可以省略的。**
 
@@ -6137,8 +6150,7 @@ public class AnnotationTest {
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665545860738-8bae2a45-efa8-40eb-9213-0dbd2ae1b54a.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_14%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十二.Ioc注解式开发/12.3.3执行结果.png" alt="img" style="zoom:80%;" />
 
 **如果把value属性彻底去掉，spring会被Bean自动取名吗？会的。并且默认名字的规律是：Bean类名首字母小写即可。**
 
@@ -6175,8 +6187,7 @@ public class AnnotationTest {
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665546100844-e0ffc213-8126-419a-ab67-7f433ad43105.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_15%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+<img src="../MDImg/spring6-动力节点/IMG/十二.Ioc注解式开发/12.3.4执行结果.png" alt="img" style="zoom:80%;" />
 
 我们将Component注解换成其它三个注解，看看是否可以用：
 
@@ -6191,8 +6202,7 @@ public class BankDao {
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665546198246-f9d6adc1-ecc8-4e8c-babf-49f2ed7b87cd.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_14%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+<img src="../MDImg/spring6-动力节点/IMG/十二.Ioc注解式开发/12.3.5执行结果.png" alt="img" style="zoom:80%;" />
 
 剩下的两个注解大家可以测试一下。
 
@@ -6252,8 +6262,7 @@ public class AnnotationTest {
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665546710304-8ebbe95d-1d1d-44fa-9605-9dad43e487b7.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_15%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十二.Ioc注解式开发/12.3.6执行结果.png" alt="img" style="zoom:80%;" />
 
 我们再来看看，指定共同的父包行不行：
 
@@ -6269,8 +6278,7 @@ public class AnnotationTest {
 ```
 
 执行测试程序：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665546777022-4eb8c5e3-22ed-4baf-8722-a5fa98df253d.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_15%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十二.Ioc注解式开发/12.3.7执行结果.png" alt="img" style="zoom:80%;" />
 
 ## 12.4 选择性实例化Bean
 
@@ -6358,8 +6366,7 @@ public void testChoose(){
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665556059297-de0d7dbc-aa37-46a3-9b1d-1d4c246b0ffc.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_15%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十二.Ioc注解式开发/12.3.8执行结果.png" alt="img" style="zoom:80%;" />
 
 也可以将use-default-filters设置为true（不写就是true），并且采用exclude-filter方式排出哪些注解标注的Bean不参与实例化：
 
@@ -6372,8 +6379,7 @@ public void testChoose(){
 ```
 
 执行测试程序：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665556372417-14f2208c-4151-4bcd-9f22-80db5e3ed837.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_14%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十二.Ioc注解式开发/12.3.9执行结果.png" alt="img" style="zoom:80%;" />
 
 ## 12.5 负责注入的注解
 
@@ -6422,6 +6428,8 @@ public class User {
                            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
     <context:component-scan base-package="com.powernode.spring6.bean4"/>
 </beans>
+```
+```java
 @Test
 public void testValue(){
     ApplicationContext applicationContext = new ClassPathXmlApplicationContext("spring-injection.xml");
@@ -6431,8 +6439,7 @@ public void testValue(){
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665557109935-e0300b67-fd35-4d66-99d1-dac41cb0f13d.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_14%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十二.Ioc注解式开发/12.5.1执行结果.png" alt="img" style="zoom:80%;" />
 
 通过以上代码可以发现，我们并没有给属性提供setter方法，但仍然可以完成属性赋值。
 
@@ -6472,8 +6479,7 @@ public class User {
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665557275282-82ba995b-6395-4d32-b322-d976ac3299d1.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_14%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十二.Ioc注解式开发/12.5.2执行结果.png" alt="img" style="zoom:80%;" />
 
 通过测试可以得知，@Value注解可以直接使用在属性上，也可以使用在setter方法上。都是可以的。都可以完成属性的赋值。
 
@@ -6510,8 +6516,7 @@ public class User {
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665557643220-1010bea9-5578-4388-8868-4beb11dfbe95.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_13%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十二.Ioc注解式开发/12.5.3执行结果.png" alt="img" style="zoom:80%;" />
 
 通过测试得知：@Value注解可以出现在属性上、setter方法上、以及构造方法的形参上。可见Spring给我们提供了多样化的注入。太灵活了。
 
@@ -6520,6 +6525,8 @@ public class User {
 @Autowired注解可以用来注入**非简单类型**。被翻译为：自动连线的，或者自动装配。
 
 单独使用@Autowired注解，**默认根据类型装配**。【默认是byType】
+
+@Autowired注解和@Qualifier注解联合起来才可以根据名称进行装配
 
 看一下它的源码：
 
@@ -6543,8 +6550,7 @@ public @interface Autowired {
 源码中有两处需要注意：
 
 - 第一处：该注解可以标注在哪里？
-
-- - 构造方法上
+  - 构造方法上
   - 方法上
   - 形参上
   - 属性上
@@ -6560,6 +6566,8 @@ package com.powernode.spring6.dao;
 public interface UserDao {
     void insert();
 }
+```
+```java
 package com.powernode.spring6.dao;
 
 import org.springframework.stereotype.Repository;
@@ -6571,6 +6579,8 @@ public class UserDaoForMySQL implements UserDao{
         System.out.println("正在向mysql数据库插入User数据");
     }
 }
+```
+```java
 package com.powernode.spring6.service;
 
 import com.powernode.spring6.dao.UserDao;
@@ -6589,6 +6599,8 @@ public class UserService {
         userDao.insert();
     }
 }
+```
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -6597,6 +6609,8 @@ public class UserService {
                            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
     <context:component-scan base-package="com.powernode.spring6.dao,com.powernode.spring6.service"/>
 </beans>
+```
+```java
 @Test
 public void testAutowired(){
     ApplicationContext applicationContext = new ClassPathXmlApplicationContext("spring-injection.xml");
@@ -6606,8 +6620,7 @@ public void testAutowired(){
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665561365140-b0200308-0c25-4a29-96be-5a93594e2d2b.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_14%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十二.Ioc注解式开发/12.5.4执行结果.png" alt="img" style="zoom:80%;" />
 
 以上构造方法和setter方法都没有提供，经过测试，仍然可以注入成功。
 
@@ -6637,8 +6650,7 @@ public class UserService {
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665562770986-e19377a6-af3e-4082-9463-16c795742ad5.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_14%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十二.Ioc注解式开发/12.5.4执行结果.png" alt="img" style="zoom:80%;" />
 
 **我们再来看看能不能出现在构造方法上：**
 
@@ -6666,8 +6678,7 @@ public class UserService {
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665562985700-7820d3d8-cf43-43af-8c81-46f301ea2835.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_13%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+<img src="../MDImg/spring6-动力节点/IMG/十二.Ioc注解式开发/12.5.4执行结果.png" alt="img" style="zoom:80%;" />
 
 **再来看看，这个注解能不能只标注在构造方法的形参上：**
 
@@ -6694,8 +6705,7 @@ public class UserService {
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665563225083-172d5675-cfcb-4f63-9b83-ce85b29b953e.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_14%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十二.Ioc注解式开发/12.5.4执行结果.png" alt="img" style="zoom:80%;" />
 
 **还有更劲爆的，当有参数的构造方法只有一个时，@Autowired注解可以省略。**
 
@@ -6721,8 +6731,7 @@ public class UserService {
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665563320900-df9e4cb3-c046-4f5c-b482-42951f18fb16.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_14%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十二.Ioc注解式开发/12.5.4执行结果.png" alt="img" style="zoom:80%;" />
 
 **当然，如果有多个构造方法，@Autowired肯定是不能省略的。**
 
@@ -6752,8 +6761,7 @@ public class UserService {
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665563410134-267b2484-54a3-4204-8e02-a9499ecbe614.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_40%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十二.Ioc注解式开发/12.5.5执行结果.png" alt="img" style="zoom:80%;" />
 
 到此为止，我们已经清楚@Autowired注解可以出现在哪些位置了。
 
@@ -6774,8 +6782,7 @@ public class UserDaoForOracle implements UserDao{
 ```
 
 当你写完这个新的实现类之后，此时IDEA工具已经提示错误信息了：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665563729880-0421bc02-19ca-4353-8a10-5b0ef9972b90.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_29%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十二.Ioc注解式开发/12.5.6执行结果.png" alt="img" style="zoom:80%;" />
 
 错误信息中说：不能装配，UserDao这个Bean的数量大于1.
 
@@ -6795,6 +6802,8 @@ public class UserDaoForOracle implements UserDao{
         System.out.println("正在向Oracle数据库插入User数据");
     }
 }
+```
+```java
 package com.powernode.spring6.service;
 
 import com.powernode.spring6.dao.UserDao;
@@ -6820,8 +6829,7 @@ public class UserService {
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665564055076-ffda3ad0-f957-4216-bf6c-957d62724d5f.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_14%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十二.Ioc注解式开发/12.5.7执行结果.png" alt="img" style="zoom:80%;" />
 
 总结：
 
@@ -6861,8 +6869,7 @@ public class UserService {
 ```
 
 @Resource注解的源码如下：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665565515435-2ad5614a-8572-4c6f-80c1-efa236dbe35f.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_30%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十二.Ioc注解式开发/12.5.8执行结果.png" alt="img" style="zoom:80%;" />
 
 测试一下：
 
@@ -6878,6 +6885,8 @@ public class UserDaoForOracle implements UserDao{
         System.out.println("正在向Oracle数据库插入User数据");
     }
 }
+```
+```java
 package com.powernode.spring6.service;
 
 import com.powernode.spring6.dao.UserDao;
@@ -6897,8 +6906,7 @@ public class UserService {
 ```
 
 执行测试程序：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665622877352-0ae69e3c-e7f3-452d-a405-392901612465.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_13%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十二.Ioc注解式开发/12.5.9执行结果.png" alt="img" style="zoom:80%;" />
 
 **我们把UserDaoForOracle的名字xyz修改为userDao，让这个Bean的名字和UserService类中的UserDao属性名一致：**
 
@@ -6914,6 +6922,8 @@ public class UserDaoForOracle implements UserDao{
         System.out.println("正在向Oracle数据库插入User数据");
     }
 }
+```
+```java
 package com.powernode.spring6.service;
 
 import com.powernode.spring6.dao.UserDao;
@@ -6933,8 +6943,7 @@ public class UserService {
 ```
 
 执行测试程序：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665623044796-c4051a04-c56b-4ce9-b627-333ab7ca7b6a.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_14%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十二.Ioc注解式开发/12.5.9执行结果.png" alt="img" style="zoom:80%;" />
 
 通过测试得知，当@Resource注解使用时没有指定name的时候，还是根据name进行查找，这个name是属性名。
 
@@ -6960,8 +6969,7 @@ public class UserService {
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665623273523-aff8ef45-b484-4462-bacc-fba7e14c8fee.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_45%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十二.Ioc注解式开发/12.5.10执行结果.png" alt="img" style="zoom:80%;" />
 
 根据异常信息得知：显然当通过name找不到的时候，自然会启动byType进行注入。以上的错误是因为UserDao接口下有两个实现类导致的。所以根据类型注入就会报错。
 
@@ -6992,9 +7000,8 @@ public class UserService {
 
 注意这个setter方法的方法名，setUserDao去掉set之后，将首字母变小写userDao，userDao就是name
 
-执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665623530366-79b8e09d-2559-4657-83eb-0b722261045f.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_14%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+执行结果：|
+ <img src="../MDImg/spring6-动力节点/IMG/十二.Ioc注解式开发/12.5.9执行结果.png" alt="img" style="zoom:80%;" />
 
 当然，也可以指定name：
 
@@ -7022,8 +7029,7 @@ public class UserService {
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665623611980-a66591e7-bd29-4327-a43c-6c6492c8612f.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_14%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十二.Ioc注解式开发/12.5.11执行结果.png" alt="img" style="zoom:80%;" />
 
 一句话总结@Resource注解：默认byName注入，没有指定name时把属性名当做name，根据name找不到时，才会byType注入。byType注入时，某种类型的Bean只能有一个。
 
@@ -7056,8 +7062,7 @@ public void testNoXml(){
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665624710824-61ee0ae9-ae96-49bf-b189-4a1f358e084a.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_14%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十二.Ioc注解式开发/12.5.11执行结果.png" alt="img" style="zoom:80%;" />
 
 
 
@@ -7072,12 +7077,9 @@ JdbcTemplate是Spring提供的一个JDBC模板类，是对JDBC的封装，简化
 ## 13.1 环境准备
 
 数据库表：t_user
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665633536319-466a1b96-90ff-4a87-82ad-fb14f32a8d12.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_23%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十三.jdbc/13.1eg.png" alt="img" style="zoom:80%;" />
 
 IDEA中新建模块：spring6-007-jdbc
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665633731889-aa224eae-8ff7-47af-aaf5-70500c7cf37e.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_22%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
 
 引入相关依赖：
 
@@ -7140,12 +7142,6 @@ IDEA中新建模块：spring6-007-jdbc
 ```java
 package com.powernode.spring6.bean;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className User
- * @since 1.0
- **/
 public class User {
     private Integer id;
     private String realName;
@@ -7211,10 +7207,9 @@ JdbcTemplate是Spring提供好的类，这类的完整类名是：org.springfram
 ```
 
 我们来看一下这个JdbcTemplate源码：
+<img src="../MDImg/spring6-动力节点/IMG/十三.jdbc/13.2eg.png" alt="img" style="zoom:80%;" />
 
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665641540149-8f44a8b1-35b6-4c8a-bd27-f08ebd911e01.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_28%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665641567361-50fd782b-cea4-4ca2-9818-01696aca0eb0.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_33%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十三.jdbc/13.3eg.png" alt="img" style="zoom:80%;" />
 
 可以看到JdbcTemplate中有一个DataSource属性，这个属性是数据源，我们都知道连接数据库需要Connection对象，而生成Connection对象是数据源负责的。所以我们需要给JdbcTemplate设置数据源属性。
 
@@ -7231,12 +7226,6 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className MyDataSource
- * @since 1.0
- **/
 public class MyDataSource implements DataSource {
     // 添加4个属性
     private String driver;
@@ -7350,12 +7339,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className JdbcTest
- * @since 1.0
- **/
 public class JdbcTest {
     @Test
     public void testInsert(){
@@ -7392,8 +7375,7 @@ public void testUpdate(){
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665642952562-a030937f-b3f5-4018-b92e-02d25ab390d7.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_14%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十三.jdbc/13.4eg.png" alt="img" style="zoom:80%;" />
 
 ## 13.4 删除
 
@@ -7411,8 +7393,7 @@ public void testDelete(){
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665643115536-fb7949b8-9bcd-4d45-8032-40c3658911fd.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_14%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十三.jdbc/13.5eg.png" alt="img" style="zoom:80%;" />
 
 ## 13.5 查询一个对象
 
@@ -7430,8 +7411,7 @@ public void testSelectOne(){
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665643791948-c5a4f422-4c49-426a-88f3-004907f696dd.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_14%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十三.jdbc/13.6eg.png" alt="img" style="zoom:80%;" />
 
 queryForObject方法三个参数：
 
@@ -7455,8 +7435,7 @@ public void testSelectAll(){
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665644613140-cc029b6f-7dbe-40fa-896c-ba8674da014c.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_24%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十三.jdbc/13.7eg.png" alt="img" style="zoom:80%;" />
 
 ## 13.7 查询一个值
 
@@ -7474,8 +7453,7 @@ public void testSelectOneValue(){
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665644735494-3aff4263-8172-4e33-b5e4-564dda88a704.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_14%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十三.jdbc/13.8eg.png" alt="img" style="zoom:80%;" />
 
 ## 13.8 批量添加
 
@@ -7502,8 +7480,7 @@ public void testAddBatch(){
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665645369060-9a473341-e4d2-4c26-bdd4-7d83fd93cc82.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_14%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十三.jdbc/13.9eg.png" alt="img" style="zoom:80%;" />
 
 ## 13.9 批量修改
 
@@ -7529,8 +7506,7 @@ public void testUpdateBatch(){
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665645613528-7edf2796-3f40-4c6d-bedc-9022fb16d7da.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_14%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十三.jdbc/13.10eg.png" alt="img" style="zoom:80%;" />
 
 ## 13.10 批量删除
 
@@ -7555,8 +7531,7 @@ public void testDeleteBatch(){
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665645815657-de657db3-cb20-4758-a40e-2c049175d89e.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_14%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十三.jdbc/13.10eg.png" alt="img" style="zoom:80%;" />
 
 ## 13.11 使用回调函数
 
@@ -7589,9 +7564,8 @@ public void testCallback(){
 }
 ```
 
-执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665646365875-6ff081a4-74a0-469d-a3ed-b579235743ee.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_14%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+执行结果： 
+ <img src="../MDImg/spring6-动力节点/IMG/十三.jdbc/13.11eg.png" alt="img" style="zoom:80%;" />
 
 ## 13.12 使用德鲁伊连接池
 
@@ -7629,8 +7603,7 @@ public void testCallback(){
 ```
 
 测试结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665647176481-660d65ae-f65a-4448-a34d-81ec96ee3b08.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_29%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十三.jdbc/13.12eg.png" alt="img" style="zoom:80%;" />
 
 
 
@@ -7657,8 +7630,7 @@ public void testCallback(){
 - 代理类和目标类的公共接口（抽象主题）：客户端在使用代理类时就像在使用目标类，不被客户端所察觉，所以代理类和目标类要有共同的行为，也就是实现共同的接口。
 
 代理模式的类图：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665651817094-af9ecbad-24ae-4c11-9fa2-efe46653df25.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_15%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十四.GoF之代理模式/14.1.1eg.png" alt="img" style="zoom:80%;" />
 
 代理模式在代码实现上，包括两种形式：
 
@@ -7674,10 +7646,6 @@ package com.powernode.mall.service;
 
 /**
  * 订单接口
- * @author 动力节点
- * @version 1.0
- * @className OrderService
- * @since 1.0
  **/
 public interface OrderService {
     /**
@@ -7695,15 +7663,14 @@ public interface OrderService {
      */
     void modify();
 }
+```
+```java
 package com.powernode.mall.service.impl;
 
 import com.powernode.mall.service.OrderService;
 
 /**
- * @author 动力节点
- * @version 1.0
- * @className OrderServiceImpl
- * @since 1.0
+ * 订单实现类业务层
  **/
 public class OrderServiceImpl implements OrderService {
     @Override
@@ -7740,7 +7707,7 @@ public class OrderServiceImpl implements OrderService {
 
 其中Thread.sleep()方法的调用是为了模拟操作耗时。
 
-项目已上线，并且运行正常，只是客户反馈系统有一些地方运行较慢，要求项目组对系统进行优化。于是项目负责人就下达了这个需求。首先需要搞清楚是哪些业务方法耗时较长，于是让我们统计每个业务方法所耗费的时长。如果是你，你该怎么做呢？
+项目已上线，并且运行正常，只是客户反馈系统有一些地方运行较慢，要求项目组对系统进行优化。于是项目负责人就下达了这个需求。首先需要搞清楚是哪些业务方法耗时较长，于是让我们**统计每个业务方法所耗费的时长**。如果是你，你该怎么做呢？
 
 第一种方案：直接修改Java源代码，在每个业务方法中添加统计逻辑，如下：
 
@@ -7749,12 +7716,6 @@ package com.powernode.mall.service.impl;
 
 import com.powernode.mall.service.OrderService;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className OrderServiceImpl
- * @since 1.0
- **/
 public class OrderServiceImpl implements OrderService {
     @Override
     public void generate() {
@@ -7804,12 +7765,6 @@ public class OrderServiceImpl implements OrderService {
 ```java
 package com.powernode.mall.service.impl;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className OrderServiceImplSub
- * @since 1.0
- **/
 public class OrderServiceImplSub extends OrderServiceImpl{
     @Override
     public void generate() {
@@ -7844,19 +7799,13 @@ public class OrderServiceImplSub extends OrderServiceImpl{
 
 这种方案也不可取。
 
-第三种方案：使用代理模式（这里采用静态代理）
+第三种方案：使用**代理模式（这里采用静态代理）**
 
 可以为OrderService接口提供一个代理类。
 
 ```java
 package com.powernode.mall.service;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className OrderServiceProxy
- * @since 1.0
- **/
 public class OrderServiceProxy implements OrderService{ // 代理对象
 
     // 目标对象
@@ -7907,12 +7856,6 @@ import com.powernode.mall.service.OrderService;
 import com.powernode.mall.service.OrderServiceProxy;
 import com.powernode.mall.service.impl.OrderServiceImpl;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className Client
- * @since 1.0
- **/
 public class Client {
     public static void main(String[] args) {
         // 创建目标对象
@@ -7928,8 +7871,7 @@ public class Client {
 ```
 
 运行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665711099963-e31eb7f2-4355-43c6-985a-2ed9223a7aee.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_10%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十四.GoF之代理模式/14.2.1eg.png" alt="img" style="zoom:80%;" />
 
 以上就是代理模式中的静态代理，其中OrderService接口是代理类和目标类的共同接口。OrderServiceImpl是目标类。OrderServiceProxy是代理类。
 
@@ -7937,27 +7879,23 @@ public class Client {
 
 ## 14.3 动态代理
 
-在程序运行阶段，在内存中动态生成代理类，被称为动态代理，目的是为了减少代理类的数量。解决代码复用的问题。
+在程序运行阶段，在内存中动态生成代理类，被称为动态代理，目的是**为了减少代理类的数量**。**解决代码复用的问题。**
 
 在内存当中动态生成类的技术常见的包括：
 
-- JDK动态代理技术：只能代理接口。
+- JDK动态代理技术：**只能代理接口。**
 - CGLIB动态代理技术：CGLIB(Code Generation Library)是一个开源项目。是一个强大的，高性能，高质量的Code生成类库，它可以在运行期扩展Java类与实现Java接口。它既可以代理接口，又可以代理类，**底层是通过继承的方式实现的**。性能比JDK动态代理要好。**（底层有一个小而快的字节码处理框架ASM。）**
 - Javassist动态代理技术：Javassist是一个开源的分析、编辑和创建Java字节码的类库。是由东京工业大学的数学和计算机科学系的 Shigeru Chiba （千叶 滋）所创建的。它已加入了开放源代码JBoss 应用服务器项目，通过使用Javassist对字节码操作为JBoss实现动态"AOP"框架。
 
 ### 14.3.1 JDK动态代理
 
-我们还是使用静态代理中的例子：一个接口和一个实现类。
+我们还是使用静态代理中的例子：**一个接口**和一个实现类。
 
 ```java
 package com.powernode.mall.service;
 
 /**
  * 订单接口
- * @author 动力节点
- * @version 1.0
- * @className OrderService
- * @since 1.0
  **/
 public interface OrderService {
     /**
@@ -7975,16 +7913,12 @@ public interface OrderService {
      */
     void modify();
 }
+```
+```java
 package com.powernode.mall.service.impl;
 
 import com.powernode.mall.service.OrderService;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className OrderServiceImpl
- * @since 1.0
- **/
 public class OrderServiceImpl implements OrderService {
     @Override
     public void generate() {
@@ -8028,12 +7962,6 @@ import com.powernode.mall.service.impl.OrderServiceImpl;
 
 import java.lang.reflect.Proxy;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className Client
- * @since 1.0
- **/
 public class Client {
     public static void main(String[] args) {
         // 第一步：创建目标对象
@@ -8073,12 +8001,6 @@ package com.powernode.mall.service;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className TimerInvocationHandler
- * @since 1.0
- **/
 public class TimerInvocationHandler implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -8101,12 +8023,6 @@ package com.powernode.mall.service;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className TimerInvocationHandler
- * @since 1.0
- **/
 public class TimerInvocationHandler implements InvocationHandler {
     // 目标对象
     private Object target;
@@ -8131,12 +8047,6 @@ package com.powernode.mall.service;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className TimerInvocationHandler
- * @since 1.0
- **/
 public class TimerInvocationHandler implements InvocationHandler {
     // 目标对象
     private Object target;
@@ -8172,12 +8082,6 @@ import com.powernode.mall.service.impl.OrderServiceImpl;
 
 import java.lang.reflect.Proxy;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className Client
- * @since 1.0
- **/
 public class Client {
     public static void main(String[] args) {
         // 创建目标对象
@@ -8199,8 +8103,7 @@ public class Client {
 注意：当你调用代理对象的代理方法的时候，注册在InvocationHandler接口中的invoke()方法会被调用。也就是上面代码第24 25 26行，这三行代码中任意一行代码执行，注册在InvocationHandler接口中的invoke()方法都会被调用。
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665715879232-21eb379f-c3a4-4ffc-868f-441079541feb.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_10%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十四.GoF之代理模式/14.2.2eg.png" alt="img" style="zoom:80%;" />
 
 学到这里可能会感觉有点懵，折腾半天，到最后这不是还得写一个接口的实现类吗？没省劲儿呀？
 
@@ -8213,8 +8116,7 @@ public class Client {
 到这里，JDK动态代理的原理就结束了。
 
 不过我们看以下这个代码确实有点繁琐，对于客户端来说，用起来不方便：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665716434406-4e092df4-b1a7-4d16-bbc1-1f134b8f51f7.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_37%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十四.GoF之代理模式/14.2.3eg.png" alt="img" style="zoom:80%;" />
 
 我们可以提供一个工具类：ProxyUtil，封装一个方法：
 
@@ -8225,12 +8127,6 @@ import com.powernode.mall.service.TimerInvocationHandler;
 
 import java.lang.reflect.Proxy;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className ProxyUtil
- * @since 1.0
- **/
 public class ProxyUtil {
     public static Object newProxyInstance(Object target) {
         return Proxy.newProxyInstance(target.getClass().getClassLoader(), 
@@ -8252,12 +8148,6 @@ import com.powernode.mall.util.ProxyUtil;
 
 import java.lang.reflect.Proxy;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className Client
- * @since 1.0
- **/
 public class Client {
     public static void main(String[] args) {
         // 创建目标对象
@@ -8273,12 +8163,11 @@ public class Client {
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665716690080-a1fac908-d6d8-4605-b24d-2fd9fd19a7e6.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_13%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十四.GoF之代理模式/14.2.2eg.png" alt="img" style="zoom:80%;" />
 
 ### 14.3.2 CGLIB动态代理
 
-CGLIB既可以代理接口，又可以代理类。底层采用继承的方式实现。所以被代理的目标类不能使用final修饰。
+CGLIB**既可以代理接口，又可以代理类**。底层采用继承的方式实现。所以被代理的目标类不能使用final修饰。
 
 使用CGLIB，需要引入它的依赖：
 
@@ -8295,12 +8184,6 @@ CGLIB既可以代理接口，又可以代理类。底层采用继承的方式实
 ```java
 package com.powernode.mall.service;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className UserService
- * @since 1.0
- **/
 public class UserService {
 
     public void login(){
@@ -8321,12 +8204,6 @@ package com.powernode.mall;
 import com.powernode.mall.service.UserService;
 import net.sf.cglib.proxy.Enhancer;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className Client
- * @since 1.0
- **/
 public class Client {
     public static void main(String[] args) {
         // 创建字节码增强器
@@ -8340,7 +8217,6 @@ public class Client {
 
         userServiceProxy.login();
         userServiceProxy.logout();
-
     }
 }
 ```
@@ -8357,12 +8233,6 @@ import net.sf.cglib.proxy.MethodProxy;
 
 import java.lang.reflect.Method;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className TimerMethodInterceptor
- * @since 1.0
- **/
 public class TimerMethodInterceptor implements MethodInterceptor {
     @Override
     public Object intercept(Object target, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
@@ -8391,12 +8261,6 @@ import net.sf.cglib.proxy.MethodProxy;
 
 import java.lang.reflect.Method;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className TimerMethodInterceptor
- * @since 1.0
- **/
 public class TimerMethodInterceptor implements MethodInterceptor {
     @Override
     public Object intercept(Object target, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
@@ -8422,12 +8286,6 @@ import com.powernode.mall.service.TimerMethodInterceptor;
 import com.powernode.mall.service.UserService;
 import net.sf.cglib.proxy.Enhancer;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className Client
- * @since 1.0
- **/
 public class Client {
     public static void main(String[] args) {
         // 创建字节码增强器
@@ -8447,15 +8305,13 @@ public class Client {
 ```
 
 对于高版本的JDK，如果使用CGLIB，需要在启动项中添加两个启动参数：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665719287350-761d69a9-2666-40b3-9332-91d695f1eb86.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_20%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十四.GoF之代理模式/14.2.4eg.png" alt="img" style="zoom:80%;" />
 
 - --add-opens java.base/java.lang=ALL-UNNAMED
 - --add-opens java.base/sun.net.util=ALL-UNNAMED
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665719690752-0b38d1ec-f4fd-4a8e-878c-3496da353fe2.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_15%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十四.GoF之代理模式/14.2.5eg.png" alt="img" style="zoom:80%;" />
 
 
 
@@ -8485,8 +8341,7 @@ Spring的AOP使用的动态代理是：JDK动态代理 + CGLIB动态代理技术
 使用AOP可以很轻松的解决以上问题。
 
 请看下图，可以帮助你快速理解AOP的思想：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665732609757-d8ae52ba-915e-49cf-9ef4-c7bcada0d601.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_25%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十五.面向切面编程AOP/15.1.1eg.png" alt="img" style="zoom:80%;" />
 
 **用一句话总结AOP：将与核心业务无关的代码独立的抽取出来，形成一个独立的组件，然后以横向交叉的方式应用到业务流程当中的过程被称为AOP。**
 
@@ -8526,43 +8381,35 @@ public class UserService{
 ```
 
 - **连接点 Joinpoint**
-
-- - 在程序的整个执行流程中，**可以织入**切面的位置。方法的执行前后，异常抛出之后等位置。
+  - 在程序的整个执行流程中，**可以织入**切面的位置。方法的执行前后，异常抛出之后等位置。
 
 - **切点 Pointcut**
-
-- - 在程序执行流程中，**真正织入**切面的方法。（一个切点对应多个连接点）
+  - 在程序执行流程中，**真正织入**切面的方法。（一个切点对应多个连接点）
 
 - **通知 Advice**
-
-- - 通知又叫增强，就是具体你要织入的代码。
+  - 通知又叫增强，就是具体你要织入的代码。
   - 通知包括：
-
-- - - 前置通知
+    - 前置通知
     - 后置通知
     - 环绕通知
     - 异常通知
     - 最终通知
 
 - **切面 Aspect**
-
-- - **切点 + 通知就是切面。**
+  - **切点 + 通知就是切面。**
 
 - 织入 Weaving
-
-- - 把通知应用到目标对象上的过程。
+  - 把通知应用到目标对象上的过程。
 
 - 代理对象 Proxy
-
-- - 一个目标对象被织入通知后产生的新对象。
+  - 一个目标对象被织入通知后产生的新对象。
 
 - 目标对象 Target
+  - 被织入通知的对象。
 
-- - 被织入通知的对象。
 
 通过下图，大家可以很好的理解AOP的相关术语：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665735638342-44194599-66e2-4c02-a843-8a8b3ba5b0c8.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_17%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十五.面向切面编程AOP/15.1.2eg.png" alt="img" style="zoom:80%;" />
 
 ## 15.3 切点表达式
 
@@ -8788,7 +8635,7 @@ public class MyAspect {
 </beans>
 ```
 
-<aop:aspectj-autoproxy  proxy-target-class="true"/> 开启自动代理之后，凡事带有@Aspect注解的bean都会生成代理对象。
+<aop:aspectj-autoproxy  proxy-target-class="true"/>**开启自动代理之后，凡是带有@Aspect注解的bean都会生成代理对象。**
 
 proxy-target-class="true" 表示采用cglib动态代理。
 
@@ -8815,8 +8662,7 @@ public class AOPTest {
 ```
 
 运行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665843923087-e1116f09-2470-46cb-b21a-1526f62cab50.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_15%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十五.面向切面编程AOP/15.4.1eg.png" alt="img" style="zoom:60%;" />
 
 #### 通知类型
 
@@ -8871,6 +8717,8 @@ public class MyAspect {
     }
 
 }
+```
+```java
 package com.powernode.spring6.service;
 
 import org.springframework.stereotype.Component;
@@ -8883,6 +8731,8 @@ public class OrderService {
         System.out.println("订单已生成！");
     }
 }
+```
+```java
 package com.powernode.spring6.test;
 
 import com.powernode.spring6.service.OrderService;
@@ -8901,8 +8751,7 @@ public class AOPTest {
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665892617792-22cc74a2-6876-4cd1-bb17-87d3b5211cae.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_19%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十五.面向切面编程AOP/15.4.2eg.png" alt="img" style="zoom:60%;" />
 
 通过上面的执行结果就可以判断他们的执行顺序了，这里不再赘述。
 
@@ -8927,10 +8776,9 @@ public class OrderService {
 ```
 
 再次执行测试程序，结果如下：
+<img src="../MDImg/spring6-动力节点/IMG/十五.面向切面编程AOP/15.4.3eg.png" alt="img" style="zoom:60%;" />
 
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665892847715-75045cd0-63b1-47f9-a77e-05911dc72339.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_24%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
-
-通过测试得知，当发生异常之后，最终通知也会执行，因为最终通知@After会出现在finally语句块中。
+通过测试得知，**当发生异常之后，最终通知也会执行，因为最终通知@After会出现在finally语句块中。**
 
 出现异常之后，**后置通知**和**环绕通知的结束部分**不会执行。
 
@@ -8981,6 +8829,8 @@ public class YourAspect {
         System.out.println("YourAspect最终通知");
     }
 }
+```
+```java
 package com.powernode.spring6.service;
 
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -9026,12 +8876,10 @@ public class MyAspect {
 ```
 
 执行测试程序：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665893738167-b3c55a19-6129-4615-813f-9b8dc0f17f40.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_28%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+<img src="../MDImg/spring6-动力节点/IMG/十五.面向切面编程AOP/15.4.4eg.png" alt="img" style="zoom:50%;" />
 
 通过修改@Order注解的整数值来切换顺序，执行测试程序：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665893833282-2cbc59cc-15a5-44c4-bb20-cbdac65a750d.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_28%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十五.面向切面编程AOP/15.4.5eg.png" alt="img" style="zoom:50%;" />
 
 #### 优化使用切点表达式
 
@@ -9142,8 +8990,7 @@ public class MyAspect {
 注意这个@Pointcut注解标注的方法随意，只是起到一个能够让@Pointcut注解编写的位置。
 
 执行测试程序：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665893833282-2cbc59cc-15a5-44c4-bb20-cbdac65a750d.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_28%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十五.面向切面编程AOP/15.4.6eg.png" alt="img" style="zoom:50%;" />
 
 #### 全注解式开发AOP
 
@@ -9175,8 +9022,7 @@ public void testAOPWithAllAnnotation(){
 ```
 
 执行结果如下：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665893833282-2cbc59cc-15a5-44c4-bb20-cbdac65a750d.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_28%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十五.面向切面编程AOP/15.4.7eg.png" alt="img" style="zoom:50%;" />
 
 ### 15.4.3 基于XML配置方式的AOP（了解）
 
@@ -9264,8 +9110,7 @@ public class AOPTest3 {
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665902800121-49540c48-d6c2-4909-874d-e1a485e67ea5.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_23%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十五.面向切面编程AOP/15.4.8eg.png" alt="img" style="zoom:50%;" />
 
 ## 15.5 AOP的实际案例：事务处理
 
@@ -9328,7 +9173,8 @@ class 业务类1{
         }
     }
 }
-
+```
+```java
 class 业务类2{
     public void 业务方法1(){
         try{
@@ -9425,6 +9271,8 @@ public class AccountService {
         System.out.println("正在进行取款操作");
     }
 }
+```
+```java
 package com.powernode.spring6.biz;
 
 import org.springframework.stereotype.Component;
@@ -9505,8 +9353,7 @@ public class AOPTest2 {
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665899075177-6660d491-06d4-4296-b69a-b54716179c9d.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_24%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十五.面向切面编程AOP/15.5.1eg.png" alt="img" style="zoom:50%;" />
 
 通过测试可以看到，所有的业务方法都添加了事务控制的代码。
 
@@ -9536,8 +9383,6 @@ public class UserService {
     }
 }
 ```
-
-
 
 ```java
 package com.powernode.spring6.biz;
@@ -9610,8 +9455,7 @@ public void testSecurity(){
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1665901327786-9bfab382-61a3-4d1e-abe5-728b242eb3a2.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_24%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十五.面向切面编程AOP/15.5.2eg.png" alt="img" style="zoom:50%;" />
 
 
 
@@ -9646,8 +9490,7 @@ public void testSecurity(){
 连接数据库的技术采用Spring框架的JdbcTemplate。
 
 采用三层架构搭建：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1666495641174-069ee06f-097c-4f44-9a29-ca3e701d666b.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_26%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十六.Spring对事务的支持/16.1.1eg.png" alt="img" style="zoom:80%;" />
 
 模块名：spring6-013-tx-bank（依赖如下）
 
@@ -9725,12 +9568,10 @@ public void testSecurity(){
 ### 第一步：准备数据库表
 
 表结构：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1666496097440-75d21db2-588b-4f6a-bd40-149c3de6f27d.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_23%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十六.Spring对事务的支持/16.1.2eg.png" alt="img" style="zoom:80%;" />
 
 表数据：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1666496136146-5cc1d848-0ad4-425d-a1fc-8b59b5d0b91f.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_15%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十六.Spring对事务的支持/16.1.3eg.png" alt="img" style="zoom:100%;" />
 
 ### 第二步：创建包结构
 
@@ -9750,10 +9591,7 @@ com.powernode.bank.dao.impl
 package com.powernode.bank.pojo;
 
 /**
- * @author 动力节点
- * @version 1.0
- * @className Account
- * @since 1.0
+ *账户
  **/
 public class Account {
     private String actno;
@@ -9800,12 +9638,6 @@ package com.powernode.bank.dao;
 
 import com.powernode.bank.pojo.Account;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className AccountDao
- * @since 1.0
- **/
 public interface AccountDao {
 
     /**
@@ -9823,6 +9655,8 @@ public interface AccountDao {
     int update(Account act);
 
 }
+```
+```java
 package com.powernode.bank.dao.impl;
 
 import com.powernode.bank.dao.AccountDao;
@@ -9832,12 +9666,6 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className AccountDaoImpl
- * @since 1.0
- **/
 @Repository("accountDao")
 public class AccountDaoImpl implements AccountDao {
 
@@ -9865,22 +9693,15 @@ public class AccountDaoImpl implements AccountDao {
 ```java
 package com.powernode.bank.service;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className AccountService
- * @since 1.0
- **/
 public interface AccountService {
 
     /**
      * 转账
-     * @param fromActno
-     * @param toActno
-     * @param money
      */
     void transfer(String fromActno, String toActno, double money);
 }
+```
+```java
 package com.powernode.bank.service.impl;
 
 import com.powernode.bank.dao.AccountDao;
@@ -9889,12 +9710,6 @@ import com.powernode.bank.service.AccountService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className AccountServiceImpl
- * @since 1.0
- **/
 @Service("accountService")
 public class AccountServiceImpl implements AccountService {
 
@@ -9957,12 +9772,6 @@ import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className BankTest
- * @since 1.0
- **/
 public class BankTest {
     @Test
     public void testTransfer(){
@@ -9980,12 +9789,10 @@ public class BankTest {
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1666497683531-b14430f2-b90e-4555-8552-1de9747c9fcc.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_16%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十六.Spring对事务的支持/16.1.4eg.png" alt="img" style="zoom:80%;" />
 
 数据变化：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1666497727323-b2ca34c9-99c6-4b23-8d3b-8dbe3009d3e9.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_10%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十六.Spring对事务的支持/16.1.5eg.png" alt="img" style="zoom:80%;" />
 
 ### 模拟异常
 
@@ -9998,12 +9805,6 @@ import com.powernode.bank.service.AccountService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className AccountServiceImpl
- * @since 1.0
- **/
 @Service("accountService")
 public class AccountServiceImpl implements AccountService {
 
@@ -10036,12 +9837,10 @@ public class AccountServiceImpl implements AccountService {
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1666497808309-c50af959-1a57-480c-9f31-76f6ce3b555a.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_32%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十六.Spring对事务的支持/16.1.6eg.png" alt="img" style="zoom:80%;" />
 
 数据库表中数据：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1666497824308-bdd8f11f-8f99-4195-81c4-c37721627f4c.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_13%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十六.Spring对事务的支持/16.1.7eg.png" alt="img" style="zoom:80%;" />
 
 **丢了1万。**
 
@@ -10061,8 +9860,7 @@ public class AccountServiceImpl implements AccountService {
 ### Spring事务管理API
 
 Spring对事务的管理底层实现方式是基于AOP实现的。采用AOP的方式进行了封装。所以Spring专门针对事务开发了一套API，API的核心接口如下：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1666504216275-1b6a9ac4-6958-4cdf-9323-7a79a08d059d.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_16%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十六.Spring对事务的支持/16.3.1eg.png" alt="img" style="zoom:80%;" />
 
 PlatformTransactionManager接口：spring事务管理器的核心接口。在**Spring6**中它有两个实现：
 
@@ -10114,12 +9912,6 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className AccountServiceImpl
- * @since 1.0
- **/
 @Service("accountService")
 @Transactional
 public class AccountServiceImpl implements AccountService {
@@ -10153,16 +9945,13 @@ public class AccountServiceImpl implements AccountService {
 ```
 
 当前数据库表中的数据：
+ <img src="../MDImg/spring6-动力节点/IMG/十六.Spring对事务的支持/16.3.2eg.png" alt="img" style="zoom:80%;" />
 
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1666505321919-85dd9adb-bceb-49ef-826f-5a3ddf7699a0.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_10%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
-
-执行测试程序：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1666505358758-2a264b1c-3435-4f90-a42f-801001170a2b.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_33%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+执行测试程序: 
+ <img src="../MDImg/spring6-动力节点/IMG/十六.Spring对事务的支持/16.3.3eg.png" alt="img" style="zoom:80%;" />
 
 虽然出现异常了，再次查看数据库表中数据：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1666505321919-85dd9adb-bceb-49ef-826f-5a3ddf7699a0.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_10%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十六.Spring对事务的支持/16.3.4eg.png" alt="img" style="zoom:80%;" />
 
 通过测试，发现数据没有变化，事务起作用了。
 
@@ -10170,7 +9959,7 @@ public class AccountServiceImpl implements AccountService {
 
 #### 事务属性包括哪些
 
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1666506552984-8a4f9d42-73ba-4ded-853d-564d27340db5.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_24%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十六.Spring对事务的支持/16.3.5eg.png" alt="img" style="zoom:100%;" />
 
 事务中的重点属性：
 
@@ -10188,8 +9977,7 @@ public class AccountServiceImpl implements AccountService {
 在service类中有a()方法和b()方法，a()方法上有事务，b()方法上也有事务，当a()方法执行过程中调用了b()方法，事务是如何传递的？合并到一个事务里？还是开启一个新的事务？这就是事务传播行为。
 
 事务传播行为在spring框架中被定义为枚举类型：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1666505960049-06173489-15fc-4d16-94f3-1a9025f85d8c.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_20%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十六.Spring对事务的支持/16.3.6eg.png" alt="img" style="zoom:80%;" />
 
 一共有七种传播行为：
 
@@ -10253,20 +10041,17 @@ public void save(Account act) {
 事务隔离级别包括四个级别：
 
 - 读未提交：READ_UNCOMMITTED
-
-- - 这种隔离级别，存在脏读问题，所谓的脏读(dirty read)表示能够读取到其它事务未提交的数据。
+  - 这种隔离级别，存在脏读问题，所谓的脏读(dirty read)表示能够读取到其它事务未提交的数据。
 
 - 读提交：READ_COMMITTED
-
-- - 解决了脏读问题，其它事务提交之后才能读到，但存在不可重复读问题。
+  - 解决了脏读问题，其它事务提交之后才能读到，但存在不可重复读问题。
 
 - 可重复读：REPEATABLE_READ
-
-- - 解决了不可重复读，可以达到可重复读效果，只要当前事务不结束，读取到的数据一直都是一样的。但存在幻读问题。
+  - 解决了不可重复读，可以达到可重复读效果，只要当前事务不结束，读取到的数据一直都是一样的。但存在幻读问题。
 
 - 序列化：SERIALIZABLE
+  - 解决了幻读问题，事务排队执行。不支持并发。
 
-- - 解决了幻读问题，事务排队执行。不支持并发。
 
 大家可以通过一个表格来记忆：
 
@@ -10280,8 +10065,7 @@ public void save(Account act) {
 在Spring代码中如何设置隔离级别？
 
 隔离级别在spring中以枚举类型存在：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1666508609641-2c838566-7334-4cf1-b452-0fed9aaebf3d.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_11%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十六.Spring对事务的支持/16.3.7eg.png" alt="img" style="zoom:80%;" />
 
 ```java
 @Transactional(isolation = Isolation.READ_COMMITTED)
@@ -10301,12 +10085,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className IsolationService1
- * @since 1.0
- **/
 @Service("i1")
 public class IsolationService1 {
 
@@ -10325,6 +10103,8 @@ public class IsolationService1 {
     }
 
 }
+```
+```java
 package com.powernode.bank.service.impl;
 
 import com.powernode.bank.dao.AccountDao;
@@ -10333,12 +10113,6 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className IsolationService2
- * @since 1.0
- **/
 @Service("i2")
 public class IsolationService2 {
 
@@ -10476,12 +10250,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className Spring6Config
- * @since 1.0
- **/
 @Configuration
 @ComponentScan("com.powernode.bank")
 @EnableTransactionManagement
@@ -10531,12 +10299,10 @@ public void testNoXml(){
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1666511446141-925a1a0e-05ab-4306-996f-532878d5c5a3.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_32%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十六.Spring对事务的支持/16.3.8eg.png" alt="img" style="zoom:80%;" />
 
 数据库表中数据：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1666511460275-5ede53ce-9ad1-4bce-935a-32436a46c83a.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_14%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十六.Spring对事务的支持/16.3.9eg.png" alt="img" style="zoom:80%;" />
 
 ### 声明式事务之XML实现方式
 
@@ -10630,12 +10396,10 @@ public void testTransferXml(){
 ```
 
 执行结果：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1666510211960-60399e1d-ae1c-4e73-9593-3ce0086bf143.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_32%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十六.Spring对事务的支持/16.3.10eg.png" alt="img" style="zoom:80%;" />
 
 数据库表中记录：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1666510230350-5150f5ca-3812-40d6-8817-adc102516e7e.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_10%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十六.Spring对事务的支持/16.3.11eg.png" alt="img" style="zoom:80%;" />
 
 通过测试可以看到配置XML已经起作用了。
 
@@ -10701,17 +10465,13 @@ public void testTransferXml(){
     </properties>
 
 </project>
+```
+```java
 package com.powernode.spring6.bean;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className User
- * @since 1.0
- **/
 @Component
 public class User {
 
@@ -10740,6 +10500,8 @@ public class User {
         this.name = name;
     }
 }
+```
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -10762,12 +10524,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className SpringJUnit4Test
- * @since 1.0
- **/
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath:spring.xml")
 public class SpringJUnit4Test {
@@ -10783,8 +10539,7 @@ public class SpringJUnit4Test {
 ```
 
 执行结果如下：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1666602069724-ec6288cc-bb7b-417e-995e-8e1978ee6943.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_16%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十七.Junit5的支持/17.1.1eg.png" alt="img" style="zoom:80%;" />
 
 Spring提供的方便主要是这几个注解：
 
@@ -10847,6 +10602,8 @@ Spring提供的方便主要是这几个注解：
     </properties>
 
 </project>
+```
+```java
 package com.powernode.spring6.test;
 
 import com.powernode.spring6.bean.User;
@@ -10884,12 +10641,10 @@ public class SpringJUnit5Test {
 ## 18.1 实现步骤
 
 - 第一步：准备数据库表
-
-- - 使用t_act表（账户表）
+  - 使用t_act表（账户表）
 
 - 第二步：IDEA中创建一个模块，并引入依赖
-
-- - spring-context
+  - spring-context
   - spring-jdbc
   - mysql驱动
   - mybatis
@@ -10898,60 +10653,48 @@ public class SpringJUnit5Test {
   - junit
 
 - 第三步：基于三层架构实现，所以提前创建好所有的包
-
-- - com.powernode.bank.mapper
+  - com.powernode.bank.mapper
   - com.powernode.bank.service
   - com.powernode.bank.service.impl
   - com.powernode.bank.pojo
 
 - 第四步：编写pojo
-
-- - Account，属性私有化，提供公开的setter getter和toString。
+  - Account，属性私有化，提供公开的setter getter和toString。
 
 - 第五步：编写mapper接口
-
-- - AccountMapper接口，定义方法
+  - AccountMapper接口，定义方法
 
 - 第六步：编写mapper配置文件
-
-- - 在配置文件中配置命名空间，以及每一个方法对应的sql。
+  - 在配置文件中配置命名空间，以及每一个方法对应的sql。
 
 - 第七步：编写service接口和service接口实现类
-
-- - AccountService
+  - AccountService
   - AccountServiceImpl
 
 - 第八步：编写jdbc.properties配置文件
-
-- - 数据库连接池相关信息
+  - 数据库连接池相关信息
 
 - 第九步：编写mybatis-config.xml配置文件
-
-- - 该文件可以没有，大部分的配置可以转移到spring配置文件中。
+  - 该文件可以没有，大部分的配置可以转移到spring配置文件中。
   - 如果遇到mybatis相关的系统级配置，还是需要这个文件。
 
 - 第十步：编写spring.xml配置文件
-
-- - 组件扫描
+  - 组件扫描
   - 引入外部的属性文件
   - 数据源
   - SqlSessionFactoryBean配置
-
-- - - 注入mybatis核心配置文件路径
+    - 注入mybatis核心配置文件路径
     - 指定别名包
     - 注入数据源
 
-- - Mapper扫描配置器
+  - Mapper扫描配置器
+    - 指定扫描的包
 
-- - - 指定扫描的包
+  - 事务管理器DataSourceTransactionManager
+    - 注入数据源
 
-- - 事务管理器DataSourceTransactionManager
-
-- - - 注入数据源
-
-- - 启用事务注解
-
-- - - 注入事务管理器
+  - 启用事务注解
+    - 注入事务管理器
 
 - 第十一步：编写测试程序，并添加事务，进行测试
 
@@ -10960,10 +10703,7 @@ public class SpringJUnit5Test {
 - 第一步：准备数据库表
 
 连接数据库的工具有很多，除了之前我们使用的navicat for mysql之外，也可以使用IDEA工具自带的DataBase插件。可以根据下图提示自行配置：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1666659555476-977c1aec-6bcb-4b2b-a5d1-932a8b66cbac.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_14%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1666659459681-56e377a7-3b9e-4649-b29d-9da3c81fe46f.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_11%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十七.Junit5的支持/18.1.1eg.png" alt="img" style="zoom:80%;" />
 
 - 第二步：IDEA中创建一个模块，并引入依赖
 
@@ -11037,20 +10777,13 @@ public class SpringJUnit5Test {
 ```
 
 - 第三步：基于三层架构实现，所以提前创建好所有的包
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1666660021872-5935b222-7e72-41d9-a9e1-c532ca29ef10.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_11%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+  <img src="../MDImg/spring6-动力节点/IMG/十七.Junit5的支持/18.1.2eg.png" alt="img" style="zoom:80%;" /> 
 
 - 第四步：编写pojo
 
 ```java
 package com.powernode.bank.pojo;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className Account
- * @since 1.0
- **/
 public class Account {
     private String actno;
     private Double balance;
@@ -11098,12 +10831,6 @@ import com.powernode.bank.pojo.Account;
 
 import java.util.List;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className AccountMapper
- * @since 1.0
- **/
 public interface AccountMapper {
 
     /**
@@ -11145,8 +10872,7 @@ public interface AccountMapper {
 - 第六步：编写mapper配置文件
 
 一定要注意，按照下图提示创建这个目录。注意是斜杠不是点儿。在resources目录下新建。并且要和Mapper接口包对应上。
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1666660299388-b2e278e1-497d-4357-835c-ca95bfd87f0e.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_15%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+ <img src="../MDImg/spring6-动力节点/IMG/十七.Junit5的支持/18.1.3eg.png" alt="img" style="zoom:80%;" />
 
 如果接口叫做AccountMapper，配置文件必须是AccountMapper.xml
 
@@ -11234,6 +10960,8 @@ public interface AccountService {
      */
     void transfer(String fromActno, String toActno, double money);
 }
+```
+```java
 package com.powernode.bank.service.impl;
 
 import com.powernode.bank.mapper.AccountMapper;
@@ -11244,12 +10972,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className AccountServiceImpl
- * @since 1.0
- **/
 @Transactional
 @Service("accountService")
 public class AccountServiceImpl implements AccountService {
@@ -11388,12 +11110,6 @@ import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-/**
- * @author 动力节点
- * @version 1.0
- * @className SMTest
- * @since 1.0
- **/
 public class SMTest {
 
     @Test
@@ -11462,9 +11178,8 @@ FactoryBean是典型的工厂方法模式。在配置文件中通过factory-meth
 
 ## 19.3 单例模式
 
-Spring用的是双重判断加锁的单例模式。请看下面代码，我们之前讲解Bean的循环依赖的时候见过：
-
-![img](https://cdn.nlark.com/yuque/0/2022/png/21376908/1666663352271-4ba8d737-1e32-4f0e-b01a-aa305ad3abea.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_34%2Ctext_5Yqo5Yqb6IqC54K5%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+Spring用的是双重判断加锁的**单例模式**。请看下面代码，我们之前讲解Bean的循环依赖的时候见过：
+ <img src="../MDImg/spring6-动力节点/IMG/十七.Junit5的支持/19.3.1eg.png" alt="img" style="zoom:80%;" />
 
 ## 19.4 代理模式
 
