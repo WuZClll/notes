@@ -430,13 +430,16 @@
 </html>
 ```
 
-### 2.2 模板语法之指令
+### 2.2 模板指令-数据绑定
 
 - 属性动态
 - 指令的一个完整的语法格式：
   `<HTML标签 v-指令名:参数="javascript表达式"></HTML标签>`
-- [v-on 事件绑定指令](###2.11  Vue的事件绑定——v-on 指令)
-- [v-if条件渲染指令](####2.21.1 条件渲染 v-if)
+- [v-on 事件绑定指令](###2.11  Vue的事件绑定——`v-on `指令)
+- [v-if条件渲染指令](####2.21.1 条件渲染 `v-if`)
+- [v-show条件渲染指令](####2.21.2 条件渲染`v-show`和`v-if`与`<template>`标签)
+- [v-for循环指令](###2.22 列表渲染 `v-for`)
+- [vue的其他指令](###2.26 Vue的其他指令)
 
 ```html
 <!DOCTYPE html>
@@ -500,7 +503,7 @@
 </html>
 ```
 
-#### 2.2.1 v-bind 指令详解
+#### 2.2.1` v-bind `指令详解
 
 - 编译前：
   `<HTML标签 v-bind:参数="表达式"></HTML标签>`
@@ -622,7 +625,7 @@
 </html>
 ```
 
-#### 2.2.2 v-model 指令详解
+#### 2.2.2` v-model `指令详解
 
 - v-model是双向数据绑定
   data <===> 视图
@@ -630,6 +633,85 @@
    因为表单类的元素才能给用户提供交互输入的界面
 - 简写
   `v-model:value="表达式"  简写为    v-model="表达式"`
+- 一些修饰符
+
+  - `v-model.number="age"` 将获取的数据转为number，如果包含其他字符则只转数字的那一部分字符，其他的非数字被过滤掉
+
+  - `v-model.trim="name"` 将获取的数据去掉前后空格
+
+  -  `v-model.lazy`不加时文本域内输入一个字母执行一次双向绑定，加上后光标离开才双向绑定
+
+    ```html
+    <textarea cols="50" rows="15" v-model.lazy="user.introduce"></textarea>
+    ```
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>v-model指令详解</title>
+    <!-- 安装Vue -->
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <!-- 
+        v-bind和v-model的区别和联系
+            1. v-bind和v-model这两个指令都可以完成数据绑定。
+            2. v-bind是单向数据绑定。
+                data ===> 视图
+                数据变化视图跟着变化，反之不可以
+            3. v-model是双向数据绑定。
+                data <===> 视图
+                数据变化视图跟着变化，反之也可以
+            4. v-bind可以使用在任何HTML标签当中。v-model只能使用在表单类元素上，例如：
+                input标签、select标签、textarea标签。
+                为什么v-model的使用会有这个限制呢？
+                    因为表单类的元素才能给用户提供交互输入的界面。
+                v-model指令通常也是用在value属性上面的。
+            5. v-bind和v-model都有简写方式：
+                v-bind简写方式：
+                    v-bind:参数="表达式"    简写为      :参数="表达式"
+                v-model简写方式：
+                    v-model:value="表达式"  简写为      v-model="表达式"
+     -->
+    <!-- 准备一个容器 -->
+    <div id="app">
+        v-bind指令：<input type="text" v-bind:value="name1"><br>
+        v-model指令：<input type="text" v-model:value="name2"><br>
+        年龄：<input type="number" v-model.number="age"><!--这里的.number是将拿到的数据转为number，如果包含其他字符则只转数字的那一部分字符，其他的非数字被过滤掉-->
+
+        <!-- 以下报错了，因为v-model不能使用在这种元素上。 -->
+        <!-- <a v-model:href="url">百度</a> -->
+
+        v-bind指令：<input type="text" :value="name1"><br>
+        v-model指令：<input type="text" v-model="name2"><br>
+
+        bind简写：<input type="text" :value="msg"><br>
+        model简写：<input type="text" v-model="msg"><br>
+    </div>
+
+    <!-- vue程序 -->
+    <script>
+        new Vue({
+            el : '#app',
+            data : {
+                name1 : 'zhangsan',
+                name2 : 'wangwu',
+                age: 1
+                url : 'https://www.baidu.com',
+                msg : 'Hello Vue!'
+            }
+        })
+    </script>
+    vmobj
+</body>
+</html>
+```
+
+
 
 ### 2.3 MVVM 分层思想
 
@@ -668,7 +750,7 @@
      <!-- 准备容器 -->
      <!-- View V-->
      <div id="app">
-        姓名：<input type="text" v-model="name">
+        姓名：<input type="text" v-model="name">>
      </div>
 
      <!-- vue程序 -->
@@ -1182,7 +1264,7 @@ html:
 </html>                                       
 ```
 
-### 2.11  Vue的事件绑定——v-on 指令
+### 2.11  Vue的事件绑定——`v-on` 指令
 
 ```html
 <!DOCTYPE html>
@@ -2430,7 +2512,7 @@ Vue事件修饰符是一种语法糖，用于在处理DOM事件时添加特殊�
 
 ### 2.21 条件渲染 
 
-#### 2.21.1 条件渲染 v-if
+#### 2.21.1 条件渲染 `v-if`
 
 `v-if`如果为`false`直接删除这个dom元素
 
@@ -2512,7 +2594,7 @@ Vue事件修饰符是一种语法糖，用于在处理DOM事件时添加特殊�
     </script>
 ```
 
-#### 2.21.2 条件渲染 v-show 和 v-if与template标签
+#### 2.21.2 条件渲染`v-show`和`v-if`与`<template>`标签
 
 另一个用于根据条件展示元素的选项是 `v-show` 指令。用法大致一样：
 
@@ -2542,7 +2624,7 @@ Vue事件修饰符是一种语法糖，用于在处理DOM事件时添加特殊�
 
 ```
 
-### 2.22 列表渲染 v-for
+### 2.22 列表渲染 `v-for`
 
 1. v-for要写在循环项上。
 2. v-for的语法规则：
@@ -2567,6 +2649,7 @@ Vue事件修饰符是一种语法糖，用于在处理DOM事件时添加特殊�
         <ul>
             <li v-for="(value, propertyName) of user">
                 {{propertyName}},{{value}}
+                <!--属性值，属性名-->
             </li>
         </ul>
 
@@ -2581,6 +2664,18 @@ Vue事件修饰符是一种语法糖，用于在处理DOM事件时添加特殊�
         <ul>
             <li v-for="(num,index) of counter">
                 {{index}}, {{num}}
+                <!--
+				0, 1
+				1, 2
+				2, 3
+				3, 4
+				4, 5
+				5, 6
+				6, 7
+				7, 8
+				8, 9
+				9, 10
+				-->
             </li>
         </ul>
 
@@ -2665,4 +2760,823 @@ Vue事件修饰符是一种语法糖，用于在处理DOM事件时添加特殊�
 </body>
 </html>
 ```
+
+### 2.23 虚拟dom与diff算法
+
+![img](../MDImg/vue/2.23-1 虚拟dom与diff算法.png)
+只有key不同时会创建一个新元素渲染这一列，其他的不同只会渲染不同的那一部分
+
+- :key不设置时，即key为索引时缺点：
+  ![img](../MDImg/vue/2.23-2 虚拟dom与diff算法.png)
+- 设置:key为主键，就不会出现错乱
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>虚拟dom与diff算法</title>
+    <script src="../js/vue.js"></script>
+    <style>
+        th,td{border: 1px solid black;}
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>{{msg}}</h1>
+        <table>
+            <tr>
+                <th>序号</th>
+                <th>英雄</th>
+                <th>能量值</th>
+                <th>选择</th>
+            </tr>
+            <!-- 
+                v-for指令所在的标签中，还有一个非常重要的属性：
+                    :key
+                如果没有指定 :key 属性，会自动拿index作为key。
+                这个key是这个dom元素的身份证号/唯一标识。
+
+                分析以下：采用 index 作为key存在什么问题？
+                    第一个问题：效率低。
+                    第二个问题：非常严重了。产生了错乱。尤其是对数组当中的某些元素进行操作。（非末尾元素。）
+                怎么解决这个问题？
+                    建议使用对象的id作为key
+             -->
+            <tr v-for="(hero,index) in heros" :key="hero.id">
+                <td>{{index+1}}</td>
+                <td>{{hero.name}}</td>
+                <td>{{hero.power}}</td>
+                <td><input type="checkbox"></td>
+            </tr>
+        </table>
+
+        <button @click="add">添加英雄麦文</button>
+    </div>
+    <script>
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                msg : '虚拟dom与diff算法',
+                heros : [
+                    {id:'101',name:'艾格文',power:10000},
+                    {id:'102',name:'麦迪文',power:9000},
+                    {id:'103',name:'古尔丹',power:8000},
+                    {id:'104',name:'萨尔',power:6000}
+                ]
+            },
+            methods : {
+                add(){
+                    this.heros.unshift({id:'105',name:'麦文',power:9100})
+                }
+            }
+        })
+    </script>
+</body>
+</html>
+```
+
+### 2.24 列表及表单案例
+
+#### 2.24-1 列表过滤-监听属性
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>列表过滤监听属性</title>
+    <script src="../js/vue.js"></script>
+    <style>
+        th,td{border: 1px solid black;}
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>{{msg}}</h1>
+        <input type="text" placeholder="请输入搜索关键字" v-model="keyword">
+        <table>
+            <tr>
+                <th>序号</th>
+                <th>英雄</th>
+                <th>能量值</th>
+                <th>选择</th>
+            </tr>
+            <tr v-for="(hero,index) in filteredHeros" :key="hero.id">
+                <td>{{index+1}}</td>
+                <td>{{hero.name}}</td>
+                <td>{{hero.power}}</td>
+                <td><input type="checkbox"></td>
+            </tr>
+        </table>
+    </div>
+    <script>
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                keyword : '',
+                msg : '列表过滤',
+                heros : [
+                    {id:'101',name:'艾格文',power:10000},
+                    {id:'102',name:'麦迪文',power:9000},
+                    {id:'103',name:'古尔丹',power:8000},
+                    {id:'104',name:'萨尔',power:6000}
+                ], 
+                filteredHeros : []
+            },
+            watch : {
+                /* keyword(val){
+                    // 执行过滤规则
+                    this.filteredHeros = this.heros.filter((hero) => {
+                        return hero.name.indexOf(val) >= 0
+                    })
+                } */
+                
+                keyword : {//搜索的关键字
+                    immediate : true,//刚打开就调用一次heanler(var)
+                    handler(val){//var就是用户输进去的搜索关键字
+                        this.filteredHeros = this.heros.filter((hero) => {
+                            //return过滤规则
+                            return hero.name.indexOf(val) >= 0
+                        })
+                    }
+                }
+            }
+        })
+
+        // 回顾filter
+        let arr = [1,2,3,4,5,6,7,8,9]
+
+        // filter不会破坏原数组的结构，会生成一个全新的数组。
+        let newArr = arr.filter((num) => {
+            //return 过滤规则
+            return num < 5
+        })
+
+        console.log(newArr)
+    </script>
+</body>
+</html>
+```
+
+#### 2.24-2 列表过滤-计算属性
+
+- 推荐使用这个
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>列表过滤计算属性实现</title>
+    <script src="../js/vue.js"></script>
+    <style>
+        th,td{border: 1px solid black;}
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>{{msg}}</h1>
+        <input type="text" placeholder="请输入搜索关键字" v-model="keyword">
+        <table>
+            <tr>
+                <th>序号</th>
+                <th>英雄</th>
+                <th>能量值</th>
+                <th>选择</th>
+            </tr>
+            <tr v-for="(hero,index) in filteredHeros" :key="hero.id">
+                <td>{{index+1}}</td>
+                <td>{{hero.name}}</td>
+                <td>{{hero.power}}</td>
+                <td><input type="checkbox"></td>
+            </tr>
+        </table>
+    </div>
+    <script>
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                keyword : '',
+                msg : '列表过滤',
+                heros : [
+                    {id:'101',name:'艾格文',power:10000},
+                    {id:'102',name:'麦迪文',power:9000},
+                    {id:'103',name:'古尔丹',power:8000},
+                    {id:'104',name:'萨尔',power:6000}
+                ]
+            },
+            computed : {
+                filteredHeros(){
+                    // 执行过滤
+                    return this.heros.filter((hero) => {
+                        return hero.name.indexOf(this.keyword) >= 0
+                    })
+                }
+            }
+        })
+    </script>
+</body>
+</html>
+```
+
+#### 2.24-3 列表排序
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>列表排序</title>
+    <script src="../js/vue.js"></script>
+    <style>
+        th,td{border: 1px solid black;}
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>{{msg}}</h1>
+        <input type="text" placeholder="请输入搜索关键字" v-model="keyword">
+        <br>
+        <button @click="type = 1">升序</button>
+        <button @click="type = 2">降序</button>
+        <button @click="type = 0">原序</button>
+        <table>
+            <tr>
+                <th>序号</th>
+                <th>英雄</th>
+                <th>能量值</th>
+                <th>选择</th>
+            </tr>
+            <tr v-for="(hero,index) in filteredHeros" :key="hero.id">
+                <td>{{index+1}}</td>
+                <td>{{hero.name}}</td>
+                <td>{{hero.power}}</td>
+                <td><input type="checkbox"></td>
+            </tr>
+        </table>
+    </div>
+    <script>
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                type : 0,
+                keyword : '',
+                msg : '列表排序',
+                heros : [
+                    {id:'101',name:'艾格文',power:10000},
+                    {id:'102',name:'麦迪文',power:9000},
+                    {id:'103',name:'古尔丹',power:8000},
+                    {id:'104',name:'萨尔',power:11000}
+                ]
+            },
+            computed : {
+                filteredHeros(){
+                    // 执行过滤
+                    const arr = this.heros.filter((hero) => {
+                        return hero.name.indexOf(this.keyword) >= 0
+                    })
+                    // 排序
+                    if(this.type === 1){
+                        arr.sort((a, b) => {
+                            return a.power - b.power
+                        })
+                    }else if(this.type == 2){
+                        arr.sort((a, b) => {
+                            return b.power - a.power
+                        })
+                    }
+                    
+                    // 返回
+                    return arr
+                }
+            }
+        })
+
+        // 回顾sort方法
+        let arr = [8,9,5,4,1,2,3]
+
+        // sort方法排序之后，不会生成一个新的数组，是在原数组的基础之上进行排序，会影响原数组的结构。
+        // 参数a和b是数组中的元素
+        arr.sort((a, b) => {
+            return b - a
+        })
+
+        console.log(arr)
+    </script>
+</body>
+</html>
+```
+
+#### 2.24-4 表单数据收集
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>表单数据的收集</title>
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <div id="app">
+        <h1>{{msg}}</h1>
+        <!-- @submit.prevent="send"阻止表单提交的默认行为(我们用ajax发请求) -->
+        <form @submit.prevent="send">
+            用户名：<input type="text" v-model.trim="user.username"><br><br><!-- v-model.trim可以将收集到的字符串去除前后空格-->
+            密码：<input type="password" v-model="user.password"><br><br>
+            年龄：<input type="number" v-model.number="user.age"><br><br><!-- v-model.number可以将收集到的字符串转为number-->
+            性别：
+                男<input type="radio" name="gender" value="1" v-model="user.gender">
+                女<input type="radio" name="gender" value="0" v-model="user.gender"><br><br>
+            爱好：
+            <!-- 注意：对于checkbox来说，如果没有手动指定value，那么会拿这个标签的checked属性的值作为value -->
+                旅游<input type="checkbox" v-model="user.interest" value="travel">
+                运动<input type="checkbox" v-model="user.interest" value="sport">
+                唱歌<input type="checkbox" v-model="user.interest" value="sing"><br><br>
+            学历：
+                <select v-model="user.grade">
+                    <option value="">请选择学历</option>
+                    <option value="zk">专科</option>
+                    <option value="bk">本科</option>
+                    <option value="ss">硕士</option>
+                </select><br><br>
+            简介：
+            <!-- v-model.lazy：不加时文本域内输入一个字母执行一次双向绑定，加上后光标离开才双向绑定 -->
+                <textarea cols="50" rows="15" v-model.lazy="user.introduce"></textarea><br><br>
+            <input type="checkbox" v-model="user.accept">阅读并接受协议<br><br>
+            <!-- <button @click.prevent="send">注册</button>阻止表单提交的默认行为(我们用ajax发请求) -->
+            <button>注册</button>
+        </form>
+    </div>
+    <script>
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                user : {
+                    username : '',
+                    password : '',
+                    age : '',
+                    gender : '1',
+                    interest : ['travel'],
+                    grade : 'ss',
+                    introduce : '',
+                    accept : ''
+                },
+                msg : '表单数据的收集'
+            },
+            methods : {
+                send(){
+                    alert('ajax...!!!!')
+                    // 将数据收集好，发送给服务器。
+                    //console.log(JSON.stringify(this.$data))
+                    console.log(JSON.stringify(this.user))
+                }
+            }
+        })
+    </script>
+</body>
+</html>
+```
+
+### 2.25 过滤器-`filters`
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>过滤器</title>
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <!-- 
+        需求：
+            从服务器端返回了一个商品的价格price，这个price的值可能是这几种情况：''、null、undefined、60.5
+            要求：
+                如果是''、null、undefined ，页面上统一显示为 - 
+                如果不是 ''、null、undefined，则页面上显示真实的数字即可。 
+            过滤器只能用在两个地方
+                插值语法和v-bind中
+        在Vue3当中，已经将过滤器语法废弃了。
+     -->
+    <div id="app">
+        <h1>{{msg}}</h1>
+        <h2>商品价格：{{formatPrice}}</h2>
+        <h2>商品价格：{{formatPrice2()}}</h2>
+        <h2>商品价格：{{price | filterA | filterB(2)}}</h2><!-- 将price这个参数通过管道的方式传给过滤器filterA然后再传给过滤器filterB 参数为保留的小数个数 -->
+        <input type="text" :value="price | filterA | filterB(3)">
+        <!-- <input type="text" v-model="price | filterA | filterB(3)">  报错-->
+
+    </div>
+
+    <hr>
+
+    <div id="app2">
+        <h2>商品价格：{{price | filterA | filterB(3)}}</h2>
+    </div>
+
+    <script>
+
+        // 配置全局的过滤器。
+        Vue.filter('filterA', function(val){
+            if(val === null || val === undefined || val === ''){
+                return '-'
+            }
+            return val
+        })
+
+        Vue.filter('filterB', function(val, number){
+            return val.toFixed(number)
+        })
+
+        const vm2 = new Vue({
+            el : '#app2',
+            data : {
+                price : 20.3
+            }
+        })
+
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                msg : '过滤器',
+                price : 50.6
+            },
+            methods: {
+                formatPrice2(){
+                    if(this.price === '' || this.price === undefined || this.price === null){
+                        return '-'
+                    }
+                    return this.price
+                }
+            },
+            computed : {//计算属性
+                formatPrice(){
+                    if(this.price === '' || this.price === undefined || this.price === null){
+                        return '-'
+                    }
+                    return this.price
+                }
+            },
+      /*       filters : {//再Vue3已经废弃了过滤器
+                // 局部过滤器，只在当前vue中可以用
+                filterA(val){//定义一个过滤器叫filterA
+                    if(val === null || val === undefined || val === ''){
+                        return '-'
+                    }
+                    return val
+                },
+                filterB(val, number){//过滤器传参，第一个参数是管道符传来的参数，不用自己写，第二个参数要写
+                    // 确保传递过来的数据val，保留number位小数。
+                    return val.toFixed(number)
+                }
+            } */
+        })
+    </script>
+</body>
+</html>
+```
+
+### 2.26 Vue的其他指令
+
+#### 2.26-1 `v-text` 
+
+将内容**填充到标签体**当中，并且是以**覆盖**的形式填充，而且填充的内容中即使存在 HTML 标签也只是会**当做一个普通的字符串**处理，不会解析。功能等同于原生 JS 中的 innerText。
+
+- 总结：不如{{}}
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue的其它指令</title>
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <div id="app">
+        <h1>{{msg}},test</h1>
+        <!-- 
+            v-text指令：
+                可以将指令的内容拿出来填充到标签体当中。和JS的innerText一样。
+                这种填充是以覆盖的形式进行的。先清空标签体当中原有的内容，填充新的内容。
+                即使内容是一段HTML代码，这种方式也不会将HTML代码解析并执行。只会当做普通文本来处理。
+         -->
+        <h1 v-text="msg">test</h1>
+        <h1 v-text="name">test</h1>
+        <h1 v-text="s1"></h1>
+
+        <!-- 
+            v-html指令：
+                和v-text一样，也是填充标签体内容。也是采用覆盖的形式进行。
+                只不过v-html会将内容当做一段HTML代码解析并执行。
+         -->
+         <h1 v-html="s1"></h1>
+    </div>
+    <script>
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                msg : 'Vue的其它指令',
+                name : 'jack',
+                s1 : '<h1>欢迎大家学习Vue！</h1>'
+            }
+        })
+    </script>
+</body>
+</html>
+```
+
+#### 2.26-2` v-html`
+
+将内容填充到标签体当中，并且是**以覆盖的形式填充**，而且将**填充的内容当做 HTML 代码解析**。功能等同于原生 JS 中的 innerHTML。 
+v-html 不要用到用户提交的内容上。可能会导致 XSS 攻击。XSS 攻击通常指的是通过利用网页开发时留下的漏洞，通过巧妙的方法注入恶意指令代码到网页，使用户加载并执行攻击者恶意制造的网页程序。这些恶意网页程序通常是 JavaScript。
+
+留言案例:(含XSS攻击)![img](../MDImg/vue/2.26-2-1eg.png)
+![img](../MDImg/vue/2.26-2-2eg.png)
+
+#### 2.26-3 `v-clock` 解决胡子问题
+
+- v-cloak 配置 css 样式来**解决胡子的闪现**问题。 
+
+- v-cloak 指令使用在标签当中，当 Vue 实例接管之后会删除这个指令。 
+
+- 这是一段 CSS 样式：当前页面中所有带有 v-cloak 属性的标签都隐藏起来。 当vue执行vue.js文件时再把这段代码干掉，渲染出来真实的数据
+  ```css
+  [v-cloak] { 
+  	display : none; 
+  }
+  ```
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--如果不加v-clock页面会展示“{{msg}}”这个字符串，加载完vue.js文件并有{{msg}}的参数时会渲染-->
+    <!--加v-clock页面会将“{{msg}}”的标签隐藏(v-clock指定的css代码)，加载完vue.js文件并有{{msg}}的参数时会渲染,并移除v-clock的css代码-->
+    <title>Vue的其它指令</title>
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1 v-cloak>{{msg}}</h1>
+    </div>
+
+    <script>
+        setTimeout(() => {
+            let scriptElt = document.createElement('script')
+            scriptElt.src = '../js/vue.js'
+            document.head.append(scriptElt)
+        }, 3000)//三秒后加载vue.js文件
+
+        setTimeout(() => {
+            const vm = new Vue({
+                el : '#app',
+                data : {
+                    msg : 'Vue的其它指令'
+                }
+            })
+        }, 4000)//四秒后创建vue实例
+    </script>
+</body>
+</html>
+```
+
+#### 2.11.4 v-once
+
+初次接触指令的时候已经学过了。**只渲染一次。之后将被视为静态内容**。 
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue的其它指令</title>
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <div id="app">
+        <ul>
+            <li v-for="user,index of users" :key="index" v-once>
+                {{user}}
+            </li>
+        </ul>
+
+        <ul>
+            <li v-for="user,index of users" :key="index">
+                {{user}}
+            </li>
+        </ul>
+    </div>
+
+    <script>
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                msg : 'Vue的其它指令',
+                users : ['jack', 'lucy', 'james']
+            }
+        })
+    </script>
+</body>
+</html>
+```
+
+#### 2.11.5 v-pre
+
+使用该指令可以提高编译速度。**带有该指令的标签将不会被编译**。可以在没有 Vue 语法规则的标签中使用**可以提高效率**。**不要将它用在带有指令语法以及插值语法的标签中。** 
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue的其它指令</title>
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <div id="app">
+        <h1 v-cloak>{{msg}}</h1>
+        <h1 v-pre>欢迎学习Vue框架！</h1>
+        <h1 v-pre>{{msg}}</h1><!-- 这里不要用v-pre他不会编译，就成为了{{msg}}字符串 -->
+
+    <script>
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                msg : 'Vue的其它指令',
+            }
+        })
+    </script>
+</body>
+</html>
+```
+
+### 2.27 Vue的自定义指令-`directives`
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自定义指令</title>
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <div id="app">
+        <h1>自定义指令</h1>
+        <div v-text="msg"></div>
+        <div v-text-danger="msg"></div>
+        用户名：<input type="text" v-bind:value="username">
+        <!-- 
+            需要一个指令，可以和v-bind指令完成相同的功能，同时将该元素的父级元素的背景色设置为蓝色。
+         -->
+        <div>
+            用户名：<input type="text" v-bind-blue="username">
+        </div>
+    </div>
+
+    <div id="app2">
+        <div v-text-danger="msg"></div>
+        <div>
+            用户名：<input type="text" v-bind-blue="username">
+        </div>
+    </div>
+
+    <script>
+        // 定义全局的指令
+        // 函数式自定义指令
+        Vue.directive('text-danger', function(element, binding){
+            //对于自定义指令来说，函数体当中的this是window，而不是vue实例。
+            console.log(this)
+            element.innerText = binding.value
+            element.style.color = 'red'
+        })
+
+        // 定义全局的指令
+        // 对象式自定义指令
+        Vue.directive('bind-blue', {
+            bind(element, binding){
+                element.value = binding.value
+                console.log(this)
+            },
+            inserted(element, binding){
+                element.parentNode.style.backgroundColor = 'skyblue'
+                console.log(this)
+            },
+            update(element, binding){
+                element.value = binding.value
+                console.log(this)
+            }
+        })
+
+        const vm2 = new Vue({
+            el : '#app2',
+            data : {
+                msg : '欢迎学习Vue框架！',
+                username : 'lucy'
+            }
+        })
+
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                msg : '自定义指令',
+                username : 'jackson'
+            },
+            directives : {//自定义指令
+                // 指令1
+                // 指令2
+                // ...
+                // 关于指令的名字：1. v- 不需要写。 2. Vue官方建议指令的名字要全部小写。如果是多个单词的话，请使用 - 进行衔接。
+                // 这个回调函数的执行时机包括两个：第一个：标签和指令第一次绑定的时候。第二个：模板被重新解析的时候。
+                // 这个回调函数有两个参数：第一个参数是真实的dom元素。 第二个参数是标签与指令之间绑定关系的对象。
+
+                // 函数式自定义指令
+                /* 'text-danger' : function(element, binding){
+                    console.log('@')
+                    element.innerText = binding.value
+                    element.style.color = 'red'
+                }, */
+                /* 'bind-blue' : function(element, binding){
+                    element.value = binding.value
+                    console.log(element)
+                    // 为什么是null，原因是这个函数在执行的时候，指令和元素完成了绑定，但是只是在内存当中完成了绑定，元素还没有被插入到页面当中。
+                    console.log(element.parentNode)
+                    element.parentNode.style.backgroundColor = 'blue'
+                }, */
+
+                // 对象式自定义指令 更加细致
+                /* 'bind-blue' : {
+                    // 这个对象中三个方法的名字不能随便写。
+                    // 这三个函数将来都会被自动调用。
+                    // 元素与指令初次绑定的时候，自动调用bind
+
+                    // 注意：在特定的时间节点调用特定的函数，这种被调用的函数称为钩子函数。
+                    bind(element, binding){
+                        element.value = binding.value
+                    },
+                    // 元素被插入到页面之后，这个函数自动被调用。
+                    inserted(element, binding){
+                        element.parentNode.style.backgroundColor = 'blue'
+                    },
+                    // 当模板重新解析的时候，这个函数会被自动调用。
+                    update(element, binding){
+                        element.value = binding.value
+                    }
+                } */
+            }
+        })
+    </script>
+</body>
+</html>
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

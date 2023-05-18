@@ -1,0 +1,96 @@
+<mxfile host="Electron" modified="2023-05-10T08:24:29.522Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/21.2.1 Chrome/112.0.5615.87 Electron/24.1.2 Safari/537.36" etag="kpRXoyVW3sgWkmkrBBkv" version="21.2.1" type="device" pages="2">
+  <diagram id="cPsyvMp2GRMEPkSod9hW" name="第 1 页">
+    <mxGraphModel dx="1036" dy="654" grid="0" gridSize="10" guides="0" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="pZa-8jkzTHcYV_0DeskW-3" value="&amp;lt;bean id=&quot;dataSource&quot; class=&quot;xxxx.DruidDataSource&amp;gt;&lt;br&gt;&amp;lt;property name=&quot;url&quot; value=&quot;jdbc:mysql://localhost:3306/db /&amp;gt;&lt;br&gt;&amp;lt;property name=&quot;username&quot; value=&quot;root&quot;/&amp;gt;&lt;br&gt;&amp;lt;/bean&amp;gt;&lt;br&gt;&lt;br&gt;&amp;lt;bean id=&quot;sqlSessionFactory&quot; class=&quot;xxx.SqlSessionFactoryBean&amp;gt;&lt;br&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;lt;property name=&quot;dataSource&quot; ref=&quot;dataSource&quot; /&amp;gt;&lt;br&gt;&amp;lt;/bean&amp;gt;" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="28" y="14" width="770" height="143" as="geometry" />
+        </mxCell>
+        <mxCell id="pZa-8jkzTHcYV_0DeskW-4" value="自动配置： 从类路径中，搜索相关的jar ， 根据jar的内容，尝试创建所需的对象。 如果有mybatis.jar ，尝试创建DataSource(根据配置文件中的url，username，password）连接数据库。 还需要创建SqlSessionFactory, Dao接口的代理对象。 这些开发人员不需要写一行代码，就能使用Mybatis框架了。" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;align=left;" parent="1" vertex="1">
+          <mxGeometry x="28" y="169" width="750" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="pZa-8jkzTHcYV_0DeskW-5" value="XXXAutoConfiguration&lt;br&gt;比如Aop的自动配置类， MyBatis的自动配置类&lt;br&gt;实现化对象，比如MyBatis的对象" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;" parent="1" vertex="1">
+          <mxGeometry x="320" y="550" width="320" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="pZa-8jkzTHcYV_0DeskW-6" value="META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports&lt;br&gt;自动配置类的列表：&lt;span style=&quot;background-color: rgb(255 , 255 , 255) ; font-size: 13px&quot;&gt;Ao&lt;/span&gt;&lt;font style=&quot;background-color: rgb(255 , 255 , 255) ; font-size: 13px&quot;&gt;pAutoConfiguration&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;" parent="1" vertex="1">
+          <mxGeometry x="24" y="242" width="573" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="a3BaBhh1nt334rFpQ_Ma-2" value="&lt;div style=&quot;background-color: rgb(255 , 255 , 255) ; font-family: &amp;#34;jetbrains mono&amp;#34; , monospace&quot;&gt;&lt;pre&gt;&lt;span style=&quot;font-size: 13px&quot;&gt;&lt;font style=&quot;font-size: 13px&quot;&gt;@AutoConfiguration:新的注解，&lt;br&gt;自动配置类使用的。代替@Configuration&lt;/font&gt;&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;" parent="1" vertex="1">
+          <mxGeometry x="26" y="311" width="268" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="a3BaBhh1nt334rFpQ_Ma-3" value="&lt;span&gt;文件xx.imports&lt;br&gt;自动配置类的列表，SpringBoot遍历列表，加载各个配置类&lt;br&gt;&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+          <mxGeometry x="50" y="540" width="180" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a3BaBhh1nt334rFpQ_Ma-4" value="" style="endArrow=classic;html=1;rounded=0;fontSize=12;" parent="1" source="a3BaBhh1nt334rFpQ_Ma-6" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="113.70000000000005" y="472.31999999999994" as="sourcePoint" />
+            <mxPoint x="99" y="536" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="138" y="502" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a3BaBhh1nt334rFpQ_Ma-5" value="加载文件" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=12;" parent="1" vertex="1">
+          <mxGeometry x="147" y="498" width="60" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="a3BaBhh1nt334rFpQ_Ma-6" value="&lt;pre style=&quot;font-size: 13px&quot;&gt;@EnableAutoConfiguration ：启用自动配置&lt;br&gt;@Import&lt;span style=&quot;font-family: &amp;#34;jetbrains mono&amp;#34; , monospace&quot;&gt;(AutoConfigurationImportSelector.&lt;/span&gt;&lt;span style=&quot;font-family: &amp;#34;jetbrains mono&amp;#34; , monospace&quot;&gt;class&lt;/span&gt;&lt;span style=&quot;font-family: &amp;#34;jetbrains mono&amp;#34; , monospace&quot;&gt;)&lt;/span&gt;&lt;/pre&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+          <mxGeometry x="37" y="422" width="332" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="a3BaBhh1nt334rFpQ_Ma-7" value="starter依赖&lt;br&gt;例如：mybatis-spring-boot-starter" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="1" vertex="1">
+          <mxGeometry x="563" y="660" width="200" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="a3BaBhh1nt334rFpQ_Ma-9" value="依赖和配置类" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=12;fontColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="656" y="623" width="90" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="a3BaBhh1nt334rFpQ_Ma-12" value="提供前置条件&lt;br&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=15;fontColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="690" y="471" width="108" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="a3BaBhh1nt334rFpQ_Ma-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=12;fontColor=#000000;" parent="1" source="a3BaBhh1nt334rFpQ_Ma-13" target="pZa-8jkzTHcYV_0DeskW-5" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a3BaBhh1nt334rFpQ_Ma-13" value="&lt;font style=&quot;font-size: 12px&quot;&gt;XXXProperties:绑定Bean。&lt;br&gt;加载application中配置项。&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;align=left;fillColor=#f8cecc;strokeColor=#b85450;" parent="1" vertex="1">
+          <mxGeometry x="400" y="450" width="160" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="a3BaBhh1nt334rFpQ_Ma-15" value="" style="endArrow=classic;html=1;rounded=0;fontSize=12;fontColor=#000000;exitX=0.456;exitY=-0.061;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.876;entryY=1.032;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="a3BaBhh1nt334rFpQ_Ma-7" target="pZa-8jkzTHcYV_0DeskW-5" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="530" y="690" as="sourcePoint" />
+            <mxPoint x="580" y="640" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="TZGxtWvvHVzUzN9jSEbk-1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="a3BaBhh1nt334rFpQ_Ma-18" target="a3BaBhh1nt334rFpQ_Ma-12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a3BaBhh1nt334rFpQ_Ma-18" value="&lt;div&gt;@Conditional&lt;/div&gt;&lt;div&gt;条件注解，当符合条件&lt;/div&gt;&lt;div&gt;自动配置有效&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="1" vertex="1">
+          <mxGeometry x="634" y="386" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a3BaBhh1nt334rFpQ_Ma-19" value="" style="endArrow=classic;html=1;rounded=0;fontSize=12;fontColor=#000000;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" parent="1" source="a3BaBhh1nt334rFpQ_Ma-18" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="650" y="540" as="sourcePoint" />
+            <mxPoint x="640" y="550" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a3BaBhh1nt334rFpQ_Ma-24" value="" style="endArrow=classic;html=1;rounded=0;fontSize=11;fontColor=#000000;exitX=1;exitY=0.613;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="a3BaBhh1nt334rFpQ_Ma-3" target="pZa-8jkzTHcYV_0DeskW-5" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="305" y="691" as="sourcePoint" />
+            <mxPoint x="355" y="641" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a3BaBhh1nt334rFpQ_Ma-25" value="指定类路径" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;fontColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="233" y="583" width="65" height="17" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="4Bqzf-TJU8wHKlmNHbMi" name="第 2 页">
+    <mxGraphModel dx="981" dy="597" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="I1uAXkt7QiyhxsY44Gpy-1" value="&lt;span style=&quot;color: rgb(51 , 51 , 51) ; font-family: &amp;#34;pingfang sc&amp;#34; , &amp;#34;helvetica neue&amp;#34; , &amp;#34;arial&amp;#34; , &amp;#34;hiragino sans gb&amp;#34; , &amp;#34;microsoft yahei ui&amp;#34; , &amp;#34;microsoft yahei&amp;#34; , &amp;#34;simsun&amp;#34; , sans-serif ; font-size: 14px ; background-color: rgb(255 , 255 , 255)&quot;&gt;SPI 全称：Service Provider Interface，是Java提供的一套用来被第三方实现或者扩展的接口，它可以用来启用框架扩展和替换组件。&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="850" height="50" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
