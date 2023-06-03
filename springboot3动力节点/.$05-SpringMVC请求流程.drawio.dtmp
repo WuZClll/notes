@@ -1,0 +1,82 @@
+<mxfile host="Electron" modified="2023-05-18T12:01:24.533Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/21.2.1 Chrome/112.0.5615.87 Electron/24.1.2 Safari/537.36" etag="pDh7rls4pGqgt8U9ISqn" version="21.2.1" type="device">
+  <diagram id="gmmoDptfVOdXqIsKBsC0" name="第 1 页">
+    <mxGraphModel dx="1022" dy="690" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="K6PckSP715Ee4rYVtaxR-1" value="DispatcherServlet&lt;br&gt;中央调度器" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="1" vertex="1">
+          <mxGeometry x="250" y="130" width="120" height="390" as="geometry" />
+        </mxCell>
+        <mxCell id="K6PckSP715Ee4rYVtaxR-2" value="OrderController&lt;br&gt;@GetMaping(&quot;/test&quot;)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+          <mxGeometry x="550" y="150" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="K6PckSP715Ee4rYVtaxR-3" value="StudentController&lt;br&gt;@GetMapping(&quot;/query&quot;)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+          <mxGeometry x="550" y="290" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="K6PckSP715Ee4rYVtaxR-4" value="ProductController" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+          <mxGeometry x="550" y="410" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="K6PckSP715Ee4rYVtaxR-5" value="用户请求1&lt;br&gt;用户请求2" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="30" y="270" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="K6PckSP715Ee4rYVtaxR-6" value="" style="endArrow=classic;html=1;rounded=0;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="160" y="280" as="sourcePoint" />
+            <mxPoint x="240" y="240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="K6PckSP715Ee4rYVtaxR-7" value="test" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="155" y="230" width="30" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="K6PckSP715Ee4rYVtaxR-8" value="请求方式 + uri地址是唯一的" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="40" y="500" width="160" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="K6PckSP715Ee4rYVtaxR-9" value="" style="endArrow=classic;html=1;rounded=0;entryX=-0.017;entryY=0.424;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" target="K6PckSP715Ee4rYVtaxR-2" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="390" y="175" as="sourcePoint" />
+            <mxPoint x="460" y="170" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="K6PckSP715Ee4rYVtaxR-10" value="" style="endArrow=classic;html=1;rounded=0;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="540" y="200" as="sourcePoint" />
+            <mxPoint x="390" y="200" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="K6PckSP715Ee4rYVtaxR-11" value="执行控制器方法" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="414" y="150" width="100" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="K6PckSP715Ee4rYVtaxR-12" value="返回数据，视图" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="414" y="210" width="100" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="K6PckSP715Ee4rYVtaxR-13" value="" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.538;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" target="K6PckSP715Ee4rYVtaxR-1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="160" y="310" as="sourcePoint" />
+            <mxPoint x="210" y="380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="K6PckSP715Ee4rYVtaxR-14" value="http://localhost:8080/query" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="80" y="340" width="160" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="K6PckSP715Ee4rYVtaxR-15" value="" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" target="K6PckSP715Ee4rYVtaxR-3" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="390" y="320" as="sourcePoint" />
+            <mxPoint x="510" y="370" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="K6PckSP715Ee4rYVtaxR-16" value="执行控制器方法" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="420" y="290" width="100" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="K6PckSP715Ee4rYVtaxR-17" value="" style="endArrow=classic;html=1;rounded=0;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="539" y="339.9999999999999" as="sourcePoint" />
+            <mxPoint x="389" y="339.9999999999999" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="K6PckSP715Ee4rYVtaxR-18" value="返回数据，视图" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="420" y="360" width="100" height="20" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

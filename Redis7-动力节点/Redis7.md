@@ -1118,11 +1118,22 @@ D、总述报告
 
 - 注意，Redis 中的所有字符串并不都是 SDS，**也会出现 C 字符串。C 字符串只会出现在字符串“字面常量”中，并且该字符串不可能发生变更。**
 
+- 需要注意的是，虽然Redis中使用SDS结构来实现字符串类型和列表类型，但是在底层实现上，Redis仍然使用C字符串来存储数据。因此，Redis中的SDS结构只是一种抽象的数据结构，用于方便地管理字符串和列表等数据类型。
+
 - eg：`redisLog(REDIS_WARNNING, “sdfsfsafsafds”);`如果对redis作二次开发，这个sdfsfsafsafds就属于字面常量C字符串
 
 - > 存的是SDS查的是C字符串
 
    <img src="..\MDImg\Redis7-动力节点\三\3.9.1-1eg.png" alt="img" style="zoom:100%;" />
+  
+- Redis中使用SDS结构的数据类型主要包括：
+
+  1. 字符串类型（string）：Redis中的字符串类型就是使用SDS结构实现的，可以存储任意长度的字符串。
+  2. 列表类型（list）：Redis中的列表类型也是使用SDS结构实现的，每个列表元素都是一个SDS结构。
+  3. 集合类型（set）：Redis中的集合类型也是使用SDS结构实现的，每个集合元素都是一个SDS结构。
+  4. 有序集合类型（sorted set）：Redis中的有序集合类型也是使用SDS结构实现的，每个有序集合元素都是一个SDS结构。
+
+  而其他的数据类型，如哈希表类型（hash）和位图类型（bitmap）等则不是使用SDS结构实现的。
 
 #### 3.9.2 SDS 结构
 
@@ -1143,3 +1154,411 @@ struct sdshdr {
 <img src="..\MDImg\Redis7-动力节点\三\3.9.2-2eg.png" alt="img" style="zoom:100%;" />
 该结构与前面不同的是，这里有 3 字节未使用空间。
 
+#### 3.9.3 SDS 的优势
+
+C 字符串使用 `Len+1 `长度的字符数组来表示实际长度为 Len 的字符串，字符数组最后以空字符’`\0`’结尾，表示字符串结束。这种结构简单，但不能满足 Redis 对字符串功能性、安全性及高效性等的要求。
+
+---
+
+1. 防止”字符串长度获取”性能瓶颈
+
+   - 对于 **C 字符串，若要获取其长度，则必须要通过遍历**整个字符串才可获取到的。对于超长字符串的遍历，会成为系统的性能瓶颈。
+
+   - 但，由于 SDS 结构体中**直接就存放着字符串的长度**数据，所以对于获取字符串长度需要消耗的系统性能，与字符串本身长度是无关的，不会成为 Redis 的性能瓶颈。
+
+2. 保障二进制安全
+
+   - C 字符串中只能包含符合某种编码格式的字符，例如 ASCII、UTF-8 等，并且除了字符串末尾外，其它位置是不能包含空字符`\0`的，否则该字符串就会被程序误解为提前结束。而在图片、音频、视频、压缩文件、office 文件等二进制数据中以空字符’\0’作为分隔符的情况是很常见的。故而在 C 字符串中是不能保存像图片、音频、视频、压缩文件、office 文件等二进制数据的。
+   - 但 SDS 不是以空字符’\0’作为字符串结束标志的，其是通过 len 属性来判断字符串是否结束的。所以，对于程序处理 SDS 中的字符串数据，无需对数据做任何限制、过滤、假设，只需读取即可。数据写入的是什么，读到的就是什么。
+
+3. 减少内存再分配次数
+
+   - SDS 采用了**空间预分配策略**与**惰性空间释放策略**来避免内存再分配问题。
+   - 空间预分配策略是指，每次 SDS 进行空间扩展时，程序不但为其分配所需的空间，还会
+     为其分配额外的未使用空间，以减少内存再分配次数。而额外分配的未使用空间大小取决于
+     空间扩展后 SDS 的 len 属性值。
+     -  如果 len 属性值小于 1M，那么分配的未使用空间 free 的大小与 len 属性值相同。
+     - 如果 len 属性值大于等于 1M ，那么分配的使用空间 free 的大小固定是 1M。
+   - SDS 对于空间释放采用的是惰性空间释放策略。该策略是指，SDS 字符串长度如果缩短，
+     那么多出的未使用空间将暂时不释放，而是增加到 free 中。以使后期扩展 SDS 时减少内存
+     再分配次数。
+   - 如果要释放 SDS 的未使用空间，则可通过 `sdsRemoveFreeSpace()`函数来释放。
+
+4. 兼容 C 函数
+
+   - Redis 中提供了很多的 SDS 的 API，以方便用户对 Redis 进行二次开发。为了能够兼容 C
+     函数，SDS 的底层数组 buf[]中的字符串仍以空字符`\0`结尾。
+   - 现在要比较的双方，一个是 SDS，一个是 C 字符串，此时可以通过 C 语言函数
+     `strcmp(sds_str->buf，c_str)`
+
+#### 3.9.4 常用的 SDS 操作函数
+
+下表列出了一些常用的 SDS 操作函数及其功能描述。
+| 函数 | 功能描述 |
+| ---- | -------- |
+|sdsnew() |使用指定的 C 字符串创建一个 SDS|
+|sdsempty() |创建一个不包含任何字符串数据的 SDS|
+|sdsdup()| 创建一个指定 SDS 的副本|
+|sdsfree()| 释放指定的 SDS|
+|sdsclear()| 清空指定 SDS 的字符串内容|
+|sdslen() |获取指定 SDS 的已使用空间 len 值|
+|sdsavail()| 获取指定 SDS 的未使用空间 free 值|
+|sdsMakeRoomFor()| 使指定的 SDS 的 free 空间增加指定的大小|
+|sdsRemoveFreeSpace() |释放指定 SDS 的 free 空间|
+|sdscat()| 将指定的 C 字符串拼接到指定 SDS 字符串末尾|
+|sdscatsds()| 将指定的 SDS 的字符串拼接到另一个指定 SDS 字符串末尾|
+|sdscpy()| 将指定的 C 字符串复制到指定的 SDS 中，覆盖原 SDS 字符串内容|
+|sdsgrouzero() |扩展 SDS 字符串到指定长度。这个扩展是使用空字符’\0’填充|
+|sdsrange()| 截取指定 SDS 中指定范围内的字符串|
+|sdstrim()| 在指定 SDS 中删除所有指定 C 字符串中出现的所有字符|
+|sdsemp()| 对比两个给定的 SDS 字符串是否相同|
+|sdstolow() |将指定 SDS 字符串中的所有字母变为小写|
+|sdstoupper() |将指定 SDS 字符串中的所有字母变为大写|
+
+### 3.10 集合的底层实现原理
+
+Redis 中对于 Set 类型的底层实现，直接采用了 hashTable。但对于 Hash、ZSet、List 集合的底层实现进行了特殊的设计，使其保证了 Redis 的高性能。
+
+#### 3.10.1 两种实现的选择
+
+- 对于Hash与ZSet集合，其底层的实现实际有两种：压缩列表zipList/listPack，与跳跃列表skipList。
+
+- 这两种实现对于用户来说是透明的，但用户写入不同的数据，系统会自动使用不同的实现。
+
+- **只有同时满足以配置文件 redis.conf 中相关集合元素数量阈值与元素大小阈值两个条件，使用的就是压缩列表 zipList，只要有一个条件不满足使用的就是跳跃列表 skipList。**例如，对于ZSet 集合中这两个条件如下：
+
+  - 集合元素个数小于 redis.conf 中 zset-max-ziplist-entries 属性的值，其默认值为 128
+
+  - 每个集合元素大小都小于 redis.conf 中 zset-max-ziplist-value 属性的值，其默认值为 64
+    字节
+
+    > `config get zset-*-ziplist-*` 
+    > `config get hash-*-ziplist-*`查看当前配置文件中的阈值
+
+#### 3.10.2 zipList
+
+在 Redis 7.0 中，已经将 zipList 全部替换为了 listPack，但为了兼容性，在配置中也保留了 zipList 的相关属性
+
+<img src="..\MDImg\Redis7-动力节点\三\3.10.2eg.png" alt="img" style="zoom:100%;" />
+
+1. 什么是 zipList
+   zipList，通常称为**压缩列表**，是一个经过**特殊编码**的用于存储**字符串或整数**的双向链表。
+   其底层数据结构由三部分构成：head、entries 与 end。这三部分在内存上是连续存放的。
+
+2. head
+   head 又由三部分构成(一共十个字节)：
+
+   - zlbytes：占 4 个字节，用于存放 zipList 列表整体数据结构所占的**字节数**，包括 zlbytes
+     本身的**长度**。
+   - zltail：占 4 个字节，用于存放 zipList 中最后一个 entry 在整个数据结构中的**偏移量**（字
+     节）。该数据的存在可以快速定位列表的尾 entry 位置，以方便操作。
+   - zllen：占 2 字节，用于存放**列表包含的 entry 个数**。由于其只有 16 位，所以 zipList 最多
+     可以含有的 entry 个数为$2^{16}-1=65535$个。
+
+3. entries
+   entries 是真正的列表，由**很多的列表元素** entry 构成。由于不同的元素类型、数值的不同，从而导致每个 entry 的长度不同。
+
+   ---
+   每个 entry 由三部分构成：
+
+   - prevlength：该部分用于记录上一个 entry 的长度，以实现**逆序遍历**。默认长度为 1 字节，
+     只要上一个 entry 的长度<254 字节，prevlength 就占 1 字节，否则其会自动扩展为 3 字节长度。
+   - encoding：该部分用于标志后面的 data 的具体类型。如果 data 为整数类型，encoding固定长度为 1 字节。如果 data 为字符串类型，则 encoding 长度可能会是 1 字节、2 字
+     节或 5 字节。data 字符串不同的长度，对应着不同的 encoding 长度。
+   - data：真正存储的数据。数据类型只能是整数类型或字符串类型。不同的数据占用的字
+     节长度不同。
+
+4. end
+   end 只包含一部分，称为 zlend。占 1 个字节，值固定为 255，即二进制位为全 1，**表示一个 zipList 列表的结束**。
+
+#### 3.10.3 listPack
+
+- 对于 ziplist，实现复杂，为了逆序遍历，每个 entry 中包含前一个 entry 的长度，这样会导致在 ziplist 中间修改或者插入 entry 时需要进行级联更新。在高并发的写操作场景下会极度降低 Redis 的性能。为了实现更紧凑、更快的解析，更简单的实现，重写实现了 ziplist，并命名为 listPack。
+- 在 Redis 7.0 中，已经将 zipList 全部替换为了listPack，但为了兼容性，在配置中也保留了 zipList 的相关属性
+
+<img src="..\MDImg\Redis7-动力节点\三\3.10.3eg.png" alt="img" style="zoom:100%;" />
+
+1. 什么是 listPack
+   - listPack 也是一个经过特殊编码的用于存储字符串或整数的双向链表。其底层数据结构也由三部分构成：head、entries 与 end，且这三部分在内存上也是连续存放的。
+   - listPack与zipList的重大区别在head与每个entry的结构上，表示列表结束的end与zipList
+     的 zlend 是相同的，占一个字节，且 8 位全为 1。
+2. head
+   head 由两部分构成：
+   - totalBytes：占 4 个字节，用于存放 listPack 列表整体数据结构所占的字节数，包括
+     totalBytes 本身的长度。
+   - elemNum：占 2 字节，用于存放列表包含的 entry 个数。其意义与 zipList 中 zllen 的相同。
+     与 zipList 的 head 相比，没有了记录最后一个 entry 偏移量的 zltail。
+3. entries
+   - entries 也是 listPack 中真正的列表，由很多的列表元素 entry 构成。由于不同的元素类
+     型、数值的不同，从而导致每个 entry 的长度不同。但与 zipList 的 entry 结构相比，listPack的 entry 结构发生了较大变化。
+   - 其中最大的变化就是没有了记录前一个 entry 长度的 prevlength，而增加了记录当前
+     entry 长度的 element-total-len。而这个改变仍然可以实现逆序遍历，但却避免了由于在列表中间修改或插入 entry 时引发的级联更新。
+   - 每个 entry 仍由三部分构成：
+     - encoding：该部分用于标志后面的 data 的具体类型。如果 data 为整数类型，encoding长度可能会是 1、2、3、4、5 或 9 字节。不同的字节长度，其标识位不同。如果 data为字符串类型，则 encoding 长度可能会是 1、2 或 5 字节。data 字符串不同的长度，对应着不同的 encoding 长度。
+     - data：真正存储的数据。数据类型只能是整数类型或字符串类型。不同的数据占用的字节长度不同。
+     - element-total-len：该部分用于记录当前 entry 的长度，用于实现逆序遍历。由于其特殊的记录方式，使其本身占有的字节数据可能会是 1、2、3、4 或 5 字节。
+
+#### 3.10.4 skipList
+
+1. 什么是 skipList
+   skipList，跳跃列表，简称跳表，是一种**随机化**的数据结构，基于**并联**的链表，实现简单，查找效率较高。简单来说跳表也是链表的一种，只不过它在链表的基础上增加了跳跃功能。也正是这个跳跃功能，使得在查找元素时，能够**提供较高的效率**。
+
+2.  skipList 原理
+   假设有一个带头尾结点的有序链表。
+   <img src="..\MDImg\Redis7-动力节点\三\3.10.4-1eg.png" alt="img" style="zoom:100%;" />
+
+   - 在该链表中，如果要查找某个数据，需要从头开始逐个进行比较，直到找到包含数据的那个节点，或者找到第一个比给定数据大的节点，或者找到最后尾结点，后两种都属于没有找到的情况。同样，当我们要插入新数据的时候，也要经历同样的查找过程，从而确定插入位置。
+   - 为了提升查找效率，在**偶数结点上增加一个指**针，让其指向下一个偶数结点。
+
+   <img src="..\MDImg\Redis7-动力节点\三\3.10.4-2eg.png" alt="img" style="zoom:100%;" />
+
+   - 这样所有偶数结点就连成了一个新的链表（简称高层链表），当然，高层链表包含的节点个数只是原来链表的一半。此时再想查找某个数据时，先沿着高层链表进行查找。当遇到第一个比待查数据大的节点时，立即从该大节点的前一个节点回到原链表中进行查找。例如，若想插入一个数据 20，则先在（8，19，31，42）的链表中查找，找到第一个比 20 大的节点 31，然后再在高层链表中找到 31 节点的前一个节点 19，然后再在原链表中获取到其下一
+     个节点值为 23。比 20 大，则将 20 插入到 19 节点与 23 节点之间。若插入的是 25，比节点
+     23 大，则插入到 23 节点与 31 节点之间。
+   - 该方式明显可以减少比较次数，提高查找效率。如果链表元素较多，为了进一步提升查找效率，可以将原链表构建为三层链表，或再高层级链表。
+
+   <img src="..\MDImg\Redis7-动力节点\三\3.10.4-3eg.png" alt="img" style="zoom:100%;" />
+
+   - 层级越高，查找效率就会越高。
+
+3. 存在的问题
+
+   - 这种对链表分层级的方式从原理上看确实提升了查找效率，但在实际操作时就出现了问题：由于固定序号的元素拥有固定层级，所以列表元素出现**增加或删除**的情况下，会**导致列表整体元素层级大调整**，但这样势必会**大大降低系统性能。**
+   - 例如，对于划分两级的链表，可以规定奇数结点为高层级链表，偶数结点为低层级链表。
+     对于划分三级的链表，可以按照节点序号与 3 取模结果进行划分。但如果插入了新的节点，
+     或删除的原来的某些节点，那么定会按照原来的层级划分规则进行重新层级划分，那么势必
+     会大大降低系统性能
+
+4. 算法优化
+   为了避免前面的问题，skipList 采用了**随机分配层级**方式。即在确定了总层级后，**每添加一个新的元素时会自动为其随机分配一个层级**。这种随机性就解决了节点序号与层级间的固定关系问题。
+   <img src="..\MDImg\Redis7-动力节点\三\3.10.4-4eg.png" alt="img" style="zoom:100%;" />
+
+   - 上图演示了列表在生成过程中为每个元素随机分配层级的过程。从这个 skiplist 的创建和插入过程可以看出，每一个节点的层级数都是随机分配的，而且新插入一个节点不会影响到其它节点的层级数。只需要修改插入节点前后的指针，而不需对很多节点都进行调整。这就降低了插入操作的复杂度。
+   - skipList 指的就是除了最下面第 1 层链表之外，它会产生若干层稀疏的链表，这些链表里面的指针跳过了一些节点，并且越高层级的链表跳过的节点越多。在查找数据的时先在高
+     层级链表中进行查找，然后逐层降低，最终可能会降到第 1 层链表来精确地确定数据位置。
+     在这个过程中由于跳过了一些节点，从而加快了查找速度。
+
+#### 3.10.5 quickList
+
+<img src="..\MDImg\Redis7-动力节点\三\3.10.5-1eg.png" alt="img" style="zoom:100%;" />
+
+（1） 什么是 quickList
+
+- quickList，快速列表，quickList 本身是一个双向无循环链表，它的每一个节点都是一个zipList。从Redis3.2版本开始，对于List的底层实现，使用quickList替代了zipList 和 linkedList。
+- zipList 与 linkedList 都存在有明显不足，而 quickList 则对它们进行了改进：吸取了 zipList 
+  和 linkedList 的优点，避开了它们的不足。
+- quickList 本质上是 zipList 和 linkedList 的混合体。其将 linkedList 按段切分，每一段使用 zipList 来紧凑存储若干真正的数据元素，多个 zipList 之间使用双向指针串接起来。当然，对于每个 zipList 中最多可存放多大容量的数据元素，在配置文件中通过 list-max-ziplist-size属性可以指定。
+
+为了更深入的理解 quickList 的工作原理，通过对检索、插入、删除等操作的实现分析来加深理解。
+
+---
+
+（2） 检索操作
+
+对于 List 元素的检索，都是以其索引 index 为依据的。quickList 由一个个的 zipList 构成，每个 zipList 的 **zllen 中记录**的就是**当前 zipList 中包含的 entry 的个数**，即包含的真正数据元素的个数。根据要检索元素的 index，从 quickList 的头节点开始，**逐个对 zipList 的 zllen 做 sum求和，直到找到第一个求和后 sum 大于 index 的 zipList，那么要检索的这个元素就在这个zipList 中**。
+
+---
+
+（3） 插入操作
+
+由于 zipList 是有大小限制的，所以在 quickList 中插入一个元素在逻辑上相对就比较复杂一些。假设要插入的元素的大小为 insertBytes，而查找到的插入位置所在的 zipList 当前的大小为 zlBytes，那么具体可分为下面几种情况：
+
+1. 情况一：当 insertBytes + zlBytes <= list-max-ziplist-size(插入的值的大小+当前这个节点的大小<这个ziplist的最大容量) 时，**直接插入**到 zipList 中相应位置即可
+2. 情况二：当 insertBytes + zlBytes > list-max-ziplist-size，且插入的位置**位于该 zipList 的首部位置**，此时需要查看该 zipList 的前一个 zipList 的大小 prev_zlBytes。
+   - 若 insertBytes + prev_zlBytes<= list-max-ziplist-size 时，直接将元素**插入到前一个zipList 的尾部位置**即可
+   - 若 insertBytes + prev_zlBytes> list-max-ziplist-size 时，**直接将元素自己构建为一个新的 zipList，并连入 quickList 中**
+3. 情况三：当 insertBytes + zlBytes > list-max-ziplist-size，且插入的位置位于该 zipList 的**尾部位置**，此时需要查看该 zipList 的后一个 zipList 的大小 next_zlBytes。
+   - 若 insertBytes + next_zlBytes<= list-max-ziplist-size 时，直接将元素插入到后一个zipList 的头部位置即可
+   - 若 insertBytes + next_zlBytes> list-max-ziplist-size 时，直接将元素自己构建为一个新的 zipList，并连入 quickList 中
+4. 情况四：当 insertBytes + zlBytes > list-max-ziplist-size，且插入的位置位于该 zipList 的**中间位置**，则**将当前 zipList 分割为两个 zipList 连接入 quickList 中**，然后将元素**插入到分割后的前面 zipList 的尾部位置**
+
+---
+
+（4） 删除操作
+对于删除操作，只需要注意一点，在相应的 zipList 中删除元素后，该 zipList 中是否还有元素。如果没有其它元素了，则将该 zipList 删除，将其前后两个 zipList 相连接。
+
+#### 3.10.6 key 与 value 中元素的数量
+
+前面讲述的 Redis 的各种特殊数据结构的设计，不仅极大提升了 Redis 的性能，并且还使得 Redis 可以支持的 key 的数量、集合 value 中可以支持的元素数量可以非常庞大。
+
+- Redis 最多可以处理 $2^{32}$个 key（约 42 亿），并且在实践中经过测试，每个 Redis 实例至少可以处理 2.5 亿个 key。
+- 每个 Hash、List、Set、ZSet 集合都可以包含 $2^{32}$
+  个元素。
+
+### 3.11 BitMap 操作命令
+
+#### 3.11.1 BitMap 简介
+
+BitMap 是 Redis 2.2.0 版本中引入的一种新的数据类型。该数据类型本质上就是一个仅**包含 0 和 1 的二进制字符串**。而其所有相关命令都是对这个字符串二进制位的操作。用于描述该字符串的属性有三个：key、offset、bitValue。
+
+- key：BitMap 是 Redis 的 key-value 中的一种 Value 的数据类型，所以该 Value 一定有其对
+  应的 key。
+- offset：每个 BitMap 数据都是一个字符串，字符串中的每个字符都有其对应的索引，该索引从 0 开始计数。该索引就称为每个字符在该 BitMap 中的偏移量 offset。这个 offset的值的范围是$[0,2^{32}-1]$，即该 offset 的最大值为 4G-1，即 4294967295，42 亿多。
+- bitValue：每个 BitMap 数据中都是一个仅包含 0 和 1 的二进制字符串，每个 offset 位上的字符就称为该位的值 bitValue。bitValue 的值非 0 即 1。
+
+#### 3.11.2 setbit
+
+- 格式：`SETBIT key offset value`
+- 功能：为给定 key 的BitMap 数据的 offset 位置设置值为 value。其返回值为修改前该 offset位置的 bitValue
+- 说明：对于原 BitMap 字符串中不存在的 offset 进行赋值，字符串会**自动伸展**以确保它可以将 value 保存在指定的 offset 上。当字符串值进行伸展时，空白位置以 0 填充。当然，设置的 value 只能是 0 或 1。不过需要注意的是，对使用较大 offset 的 SETBIT 操作来说，**内存分配过程可能造成 Redis 服务器被阻塞。**
+
+#### 3.11.3 getbit
+
+- 格式：`GETBIT key offset`
+- 功能：对 key 所储存的 BitMap 字符串值，获取指定 offset 偏移量上的位值 bitValue。
+- 说明：当 offset 比字符串值的长度大，或者 key 不存在时，返回 0 。
+
+#### 3.11.4 bitcount
+
+- 格式：`BITCOUNT key [start] [end]`
+- 功能：统计给定字符串中被设置为 1 的 bit 位的数量。一般情况下，统计的范围是给定的整个 BitMap 字符串。但也可以通过指定额外的 start 或 end 参数，实现仅对指定字节范围内字符串进行统计，包括 start 和 end 在内。
+
+  > 注意，这里的 start 与 end 的单位是字节，不是 bit，并且从 0 开始计数。
+- 说明：start 和 end 参数都可以使用负数值： -1 表示最后一个字节， -2 表示倒数第二个字节，以此类推。另外，对于不存在的 key 被当成是空字符串来处理，因此对一个不存在的 key 进行 BITCOUNT 操作，结果为 0 。
+
+#### 3.11.5 bitpos
+
+- 格式：`BITPOS key bit [start] [end]`
+- 功能：返回 key 指定的 BitMap 中**第一个值为指定值 bit(非 0 即 1) 的二进制位的位置**。pos，即 position，位置。在默认情况下， 命令将检测整个 BitMap，但用户也可以通过可选的 start 参数和 end 参数指定要检测的范围。
+- 说明：start 与 end 的意义与 bitcount 命令中的相同。
+
+#### 3.11.6 bitop
+
+- 格式：`BITOP operation destkey key [key …]`
+- 功能：对一个或多个 BitMap 字符串 key 进行**二进制位操作**，并将结果保存到 destkey 上。
+- operation 可以是 AND 、 OR 、 NOT 、 XOR 这四种操作中的任意一种：
+  - `BITOP AND destkey key [key ...] `：对一个或多个 BitMap 执行按位**与**操作，并将结果保存到 destkey 。
+  - `BITOP OR destkey key [key ...]` ：对一个或多个 BitMap 执行按位**或**操作，并将结果保存到 destkey 。
+  - `BITOP XOR destkey key [key ...] `：对一个或多个 BitMap 执行按位**异或**操作，并将结果保存到 destkey 。
+  - `BITOP NOT destkey key` ：对给定 BitMap 执行按位**非**操作，并将结果保存到 destkey 。
+- 说明：
+  -  除了 NOT 操作之外，其他操作都可以接受一个或多个 BitMap 作为输入。
+  - 除了 NOT 操作外，其他对一个 BitMap 的操作其实就是一个复制。
+  - 如果参与运算的多个 BitMap 长度不同，较短的 BitMap 会以 0 作为补充位与较长BitMap 运算，且运算结果长度与较长 BitMap 的相同。
+
+#### 3.11.7 应用场景
+
+- 由于 offset 的取值范围很大，所以其一般应用于**大数据量**的二值性统计。例如平台活跃用户统计（二值：访问或未访问）、支持率统计（二值：支持或不支持）、员工考勤统计（二值：上班或未上班）、图像二值化（二值：黑或白）等。
+- 不过，对于数据量较小的二值性统计并不适合 BitMap，可能使用 Set 更为合适。当然，具体多少数据量适合使用 Set，超过多少数据量适合使用 BitMap，这需要根据具体场景进行具体分析。
+
+---
+
+例如，一个平台要统计日活跃用户数量。
+
+- 如果使用 Set 来统计，只需上线一个用户，就将其用户 ID 写入 Set 集合即可，最后只需统计出 Set 集合中的元素个数即可完成统计。即 **Set 集合占用内存的大小与上线用户数量成正比**。假设用户 ID 为 m 位 bit 位，当前活跃用户数量为 n，则该 Set 集合的大小最少应该是m\*n 字节。
+- 如果使用 BitMap 来统计，则需要先定义出一个 BitMap，其占有的 bit 位至少为注册用户数量。只需上线一个用户，就立即使其中一个 bit 位置 1，最后只需统计出 BitMap 中 1 的个数即可完成统计。即 **BitMap 占用内存的大小与注册用户数量成正比**，与上线用户数量无关。假设平台具有注册用户数量为 N，则 BitMap 的长度至少为 N 个 bit 位，即 N/8 字节。
+
+何时使用 BitMap 更合适？令 m\*n 字节 = N/8 字节，即 n = N/8/m = N/(8\*m) 时，使用Set 集合与使用 BitMap 所占内存大小相同。以淘宝为例，其用户 ID 长度为 11 位(m)，其注册用户数量为 8 亿(N)，当活跃用户数量为 8 亿/(8\*11) = 0.09 亿 = 9\*106= 900 万，使用 Set与 BitMap 占用的内存是相等的。但淘宝的日均活跃用户数量为 8 千万，所以淘宝使用 BitMap更合适。
+
+### 3.12 HyperLogLog 操作命令
+
+#### 3.12.1 HyperLogLog 简介
+
+- HyperLogLog 是 Redis 2.8.9 版本中引入的一种新的数据类型，其意义是 hyperlog log，超级日志记录。该**数据类型可以简单理解为一个 set 集合**，集合**元素为字符串**。但实际上HyperLogLog 是一种**基数计数概率算法**，通过该算法可以利用极小的内存完成独立总数(去重)的统计。其所有相关命令都是对这个“set 集合”的操作。
+- HyperLogLog 算法是由法国人 Philippe Flajolet 博士研究出来的，Redis的作者 Antirez 为了纪念 Philippe Flajolet 博士对组合数学和基数计算算法分析的研究，在设计 HyperLogLog 命令的时候使用了 Philippe Flajolet姓名的英文首字母 PF 作为前缀。遗憾的是 Philippe Flajolet 博士于 2011年 3 月 22 日因病在巴黎辞世。
+- HyperLogLog 算法是一个纯数学算法，我们这里不做研究。
+
+#### 3.12.2 pfadd
+
+- 格式：`PFADD key element [element …]`
+- 功能：将任意数量的元素添加到指定的 HyperLogLog 集合里面。如果内部存储被修改
+  了返回 1，否则返回 0。
+
+#### 3.12.3 pfcount
+
+- 格式：`PFCOUNT key [key …]`
+- 功能：
+  - 该命令作用于单个 key 时，返回给定 key 的 HyperLogLog 集合的近似基数；
+  - 该命令作用于多个 key 时，返回所有给定 key 的 HyperLogLog 集合的并集的近似基数；
+  - 如果key 不存在，则返回0。
+
+#### 3.12.4 pfmerge
+
+- 格式：`PFMERGE destkey sourcekey [sourcekey …]`
+- 功能：将多个 HyperLogLog 集合**合并**为一个 HyperLogLog 集合，并存储到 destkey 中，
+  合并后的 HyperLogLog 的基数接近于所有 sourcekey 的 HyperLogLog 集合的并集。
+
+#### 3.12.5 应用场景
+
+HyperLogLog 可对数据量超级庞大的日志数据做不精确的去重计数统计。当然，这个不精确的度在 Redis 官方给出的误差是 0.81%。这个误差对于大多数超大数据量场景是被允许的。对于平台上每个页面每天的 UV 数据，非常适合使用 HyperLogLog 进行记录。
+
+### 3.13 Geospatial 操作命令
+
+#### 3.13.1 Geospatial 简介
+
+Geospatial，地理空间。
+Redis 在 3.2 版本中引入了 Geospatial 这种新的数据类型。该类型本质上仍是一种集合，
+只不过集合元素比较特殊，是一种**由三部分构成**的数据结构，这种数据结构称为空间元素：
+
+- 经度：longitude。有效经度为[-180，180]。正的表示东经，负的表示西经。
+- 纬度：latitude。有效纬度为[-85.05112878，85.05112878]。正的表示北纬，负的表示南纬。
+- 位置名称：为该经纬度所标注的位置所命名的名称，也称为该 Geospatial 集合的空间元
+  素名称。
+
+通过该类型可以设置、查询某地理位置的经纬度，查询某范围内的空间元素，计算两空
+间元素间的距离等。
+
+#### 3.13.2 geoadd
+
+- 格式：`GEOADD key longitude latitude member [longitude latitude member …]`
+- 功能：将一到多个空间元素**添加**到指定的空间集合中。
+- 说明：当用户尝试输入一个超出范围的经度或者纬度时，该命令会返回一个错误。
+
+#### 3.13.3 geopos 查看元素的位置
+
+- 格式：`GEOPOS key member [member …]`
+  - 功能：从指定的地理空间中**返回指定元素的位置**，即经纬度。
+  - 说明：因为 该命令接受可变数量元素作为输入，所以即使用户只给定了一个元素，命令也会返回数组。
+
+#### 3.13.4 geodist 返回距离
+
+- 格式：`GEODIST key member1 member2 [unit]`
+  - 功能：**返回两个给定位置之间的距离**。其中 `unit `必须是以下单位中的一种：
+  - `m` ：米，默认
+  - `km` ：千米
+  - `mi `：英里
+  - `ft`：英尺
+  - 说明：如果两个位置之间的其中一个不存在， 那么命令返回空值。另外，在计算距离
+  时会假设地球为完美的球形， 在极限情况下， 这一假设**最大会造成 0.5% 的误差**。
+
+#### 3.13.5 geohash 编码为字符串
+
+- 格式：`GEOHASH key member [member …]`
+- 功能：返回一个或多个位置元素的 Geohash 值。
+- 说明：GeoHash 是一种地址编码方法。他能够把二维的空间经纬度数据**编码成一个字符**
+  **串**。该值主要**用于底层应用或者调试**， 实际中的作用并不大。
+
+#### 3.13.6 georadius 返回指定半径内的元素
+
+- 格式：`GEORADIUS key longitude latitude radius m|km|ft|mi [WITHCOORD] [WITHDIST] 
+  [WITHHASH] [ASC|DESC] [COUNT count]`
+  <img src="..\MDImg\Redis7-动力节点\三\3.13.6-2eg.png" alt="img" style="zoom:67%;" />
+
+- 功能：以给定的经纬度为中心，返回指定地理空间中包含的所有位置元素中，与中心距离不超过**给定半径的元素**。返回时还可携带额外的信息：
+
+  <img src="..\MDImg\Redis7-动力节点\三\3.13.6-1eg.png" alt="img" style="zoom:67%;" />
+
+  - `WITHDIST `：在返回位置元素的同时，将**位置元素与中心之间的距离**也一并返回。距离的单位和用户给定的范围单位保持一致。
+  - `WITHCOORD `：将位置元素的**经维度也一并返回**。
+  - `WITHHASH`：将位置元素的 Geohash 也一并返回，不过这个 hash 以整数形式表示
+
+  命令默认返回未排序的位置元素。 通过以下两个参数，用户可以指定被返回位置元素
+  的排序方式：
+
+  - `ASC` ：根据中心的位置，按照从近到远的方式返回位置元素。
+  - `DESC `：根据中心的位置，按照从远到近的方式返回位置元素。
+     说明：在默认情况下， 该命令会返回所有匹配的位置元素。虽然用户可以使
+    用 COUNT <count> 选项去获取前 N 个匹配元素，但因为命令在内部可能会需要对所有
+    被匹配的元素进行处理，所以在对一个非常大的区域进行搜索时，即使使用 COUNT 选
+    项去获取少量元素，该命令的执行速度也可能会非常慢。
+    3.13.7 georadiusbymember
+     格式：GEORADIUSBYMEMBER key member radius m|km|ft|mi [WITHCOORD] [WITHDIST] 
+    [WITHHASH] [ASC|DESC] [COUNT count]
+     功能：这个命令和 GEORADIUS 命令一样，都可以找出位于指定范围内的元素，但该命
+    令的中心点是由位置元素形式给定的，而不是像 GEORADIUS 那样，使用输入的经纬度
+    来指定中心点。
+     说明：返回结果中也是包含中心点位置元素的
+    3.13.8 应用场景
+    Geospatial 的意义是地理位置，所以其主要应用地理位置相关的计算。例如，微信发现
+    中的“附近”功能，添加朋友中“雷达加朋友”功能；QQ 动态中的“附近”功能；钉钉中的“签到”
+    功能等。

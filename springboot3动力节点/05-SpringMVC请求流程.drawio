@@ -1,1 +1,82 @@
-<mxfile host="Electron" modified="2023-02-16T06:01:21.230Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/17.2.4 Chrome/96.0.4664.174 Electron/16.1.0 Safari/537.36" etag="9iQ6ovr4xfv04ABdq4u2" version="17.2.4" type="device"><diagram id="gmmoDptfVOdXqIsKBsC0" name="第 1 页">7Vpbj9soFP41SLsPHRljfHm0E6crraqNNtJu++ixaYzqmBTjSdJfv4DtJMauJpPmsrvpPIzwBxzgfJwLRwFostq+58k6/8AyUgDbyrYATYFtBz6U/xWwawAceA2w5DRrIHgAFvQbaUGrRWuakao3UDBWCLrugykrS5KKHpZwzjb9YZ9Z0V91nSzJAFikSTFE/6aZyBvUt70D/huhy7xbGbpB07NKusHtSao8ydjmCEIxQBPOmGhaq+2EFEp3nV6aebPv9O43xkkpTpnwuztPvyzmHsQxcfinv0Sy/fNdK+UlKer2wFNarROR5oQvCH8piAC2W8gFomcuW0vVArEDIh+EUxBjEDogjEHsg8gCPlJIFILQVY0gAKHfHl7sOo1yVpcZUZuCUtYmp4Is1kmqejfyCkksF6ui7f5Mi2LCCsb1XERghokn8Upw9oUc9QSuhxJXba45EOGCbL+rKbjXv7y3hK2I4Ds5pJ1g45ay9s5C1H5vDjcAdrTmR+yjoAWT9tYt97IPxMhGy80beLIHPP3BM8InrJSKKArCR1hyrPdEfEjWtFz+IsGvNdOwPROkEgfg14syJPnxM2eMId9+Ru6FGMImQ/hEhtxrEYQGBC1EncnjnETRkKOvNVG7+j+RZAf3JskZkDTnLKvTHkn/eT078N56xgM9g9gDgaPCQewCXwYLT4WMcKYbLogg8NUph5Hm9Wn2j1F2AQKQcc+9e+vfHerf1BEps1ClR/IrLZKqomlfLQcdWnslkWyQK72qoiMd4BEVdBgnRSLoS1/8mF7aFeaMyoX3DEDXoMA3VFuxmqeknXWcJBmCbMcQ5BiCRMKXRAwEaZr2xz6fOW/AXBOsDfbkXRV9vpKCLktFpiREejEUqRtNZR4bth0rmmVqesRJRb8lz1qU4natzqJPhyOAp0pWLVjVZOJw4LxKVhLD07XQBSwJYtxX/0jmhUaukX0tS/JHPJnpgFQjkO1AJ78T4M+A2o/Uh1VzqhPhicqOVWMK5M1U47UQhTi6oRNq1SX9XQh852EYN+wNWyO+070l48GlfadUBN99lB/vrCcLeh3ySXU/ObbTAdPt8YTp7vhrTjiVx1M0v8kfy8ey9levvSzu5bf3D6Yuj/fweX7bcU1Bt/XbXcr1OCEXm5HSOjPkmndgIOja1A1rIDrbDEDYZJvSx080EmsE60T0qMBxcP/yPwIBfhznDZ2+1Y09w61bem84LJTo2tRMBVrFWASCWDOGdUiWrE51/WqmI/dEE+4B320HR/HDkmmPPSNvS+awqHKpWGz1wzBG/p3D8L/q+YTguc8naAgy32HX9uXDCk8uhHzxh2ope1YwaZU5ky8qFPqW2lxXaHsQI/cNfpx7p9twpFZ0JRt/xcIvaMzonsZs5lPI5O5UY8amMd86px4pY/1MzE6L5baRU4+V3m8by4eVrR+081Pt9W4PJBT0zQcFT8Hx33lWifw3ib22jY4XyH7m22+3UeRez0bl5+GHBg33h19roPgf</diagram></mxfile>
+<mxfile host="Electron" modified="2023-05-18T12:01:21.696Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/21.2.1 Chrome/112.0.5615.87 Electron/24.1.2 Safari/537.36" etag="gRxth5bvPxTfrFzWQBw_" version="21.2.1" type="device">
+  <diagram id="gmmoDptfVOdXqIsKBsC0" name="第 1 页">
+    <mxGraphModel dx="1022" dy="690" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="K6PckSP715Ee4rYVtaxR-1" value="DispatcherServlet&lt;br&gt;中央调度器" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="1" vertex="1">
+          <mxGeometry x="250" y="130" width="120" height="390" as="geometry" />
+        </mxCell>
+        <mxCell id="K6PckSP715Ee4rYVtaxR-2" value="OrderController&lt;br&gt;@GetMaping(&quot;/test&quot;)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+          <mxGeometry x="550" y="150" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="K6PckSP715Ee4rYVtaxR-3" value="StudentController&lt;br&gt;@GetMapping(&quot;/query&quot;)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+          <mxGeometry x="550" y="290" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="K6PckSP715Ee4rYVtaxR-4" value="ProductController" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+          <mxGeometry x="550" y="410" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="K6PckSP715Ee4rYVtaxR-5" value="用户请求1&lt;br&gt;用户请求2" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="30" y="270" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="K6PckSP715Ee4rYVtaxR-6" value="" style="endArrow=classic;html=1;rounded=0;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="160" y="280" as="sourcePoint" />
+            <mxPoint x="240" y="240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="K6PckSP715Ee4rYVtaxR-7" value="test" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="155" y="230" width="30" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="K6PckSP715Ee4rYVtaxR-8" value="请求方式 + uri地址是唯一的" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="40" y="500" width="160" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="K6PckSP715Ee4rYVtaxR-9" value="" style="endArrow=classic;html=1;rounded=0;entryX=-0.017;entryY=0.424;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" target="K6PckSP715Ee4rYVtaxR-2" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="390" y="175" as="sourcePoint" />
+            <mxPoint x="460" y="170" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="K6PckSP715Ee4rYVtaxR-10" value="" style="endArrow=classic;html=1;rounded=0;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="540" y="200" as="sourcePoint" />
+            <mxPoint x="390" y="200" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="K6PckSP715Ee4rYVtaxR-11" value="执行控制器方法" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="414" y="150" width="100" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="K6PckSP715Ee4rYVtaxR-12" value="返回数据，视图" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="414" y="210" width="100" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="K6PckSP715Ee4rYVtaxR-13" value="" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.538;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" target="K6PckSP715Ee4rYVtaxR-1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="160" y="310" as="sourcePoint" />
+            <mxPoint x="210" y="380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="K6PckSP715Ee4rYVtaxR-14" value="http://localhost:8080/query" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="80" y="340" width="160" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="K6PckSP715Ee4rYVtaxR-15" value="" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" target="K6PckSP715Ee4rYVtaxR-3" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="390" y="320" as="sourcePoint" />
+            <mxPoint x="510" y="370" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="K6PckSP715Ee4rYVtaxR-16" value="执行控制器方法" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="420" y="290" width="100" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="K6PckSP715Ee4rYVtaxR-17" value="" style="endArrow=classic;html=1;rounded=0;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="539" y="339.9999999999999" as="sourcePoint" />
+            <mxPoint x="389" y="339.9999999999999" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="K6PckSP715Ee4rYVtaxR-18" value="返回数据，视图" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="420" y="360" width="100" height="20" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

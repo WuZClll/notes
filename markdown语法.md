@@ -1,4 +1,18 @@
-# 标题1 # 
+---
+title: "我的文档"
+author: "作者名"
+date: "2021-01-01"
+header-includes:
+    - \usepackage{fancyhdr}
+    - \pagestyle{fancy}
+    - \fancyhf{}
+    - \lhead{左侧页眉内容}
+    - \rhead{右侧页眉内容}
+---
+
+# 正文内容
+
+# 标题1 #
 
 ## 标题2 ## 
 
@@ -12,7 +26,7 @@
 
 2. 第二步
 
-#### 这是一个无序列表 - 
+#### 这是一个无序列表 -
 
 - 无序中。。。
 - 2
@@ -95,6 +109,8 @@ http://www.baidu.com
 *斜体*  ，    **加粗** ， `行内代码`  ，<u>下划线</u> :smile:，~~删除线~~ ，***加粗倾斜***
 ```
 
+插入音频
+
 
 
 $\theta=x$2$，
@@ -128,3 +144,25 @@ H~2~O
 ```text
 <p align="right">右对齐</p>
 ```
+
+## TOC[#](https://www.cnblogs.com/librarookie/p/15429262.html#toc)
+
+> TOC 全称为 Table of Content，自动列出全部标题。
+
+- 用法：
+  `[toc]`
+
+  在 Markdown 中，自动生成目录非常简单，只需要在恰当的位置添加 `[TOC]` 符号，凡是以 # 定义的标题都会被编排到目录中。
+
+  note:
+
+  1. 如果你想要在你的 `TOC` 中排除一个标题，请在你的标题 `后面` 添加 `{ignore=true}` 即可
+  2. 部分平台支持，已测试`typora`支持， `vscode-Markdown TOC`插件支持（`vscode原生Markdown`不支持）
+
+## 插入音频
+
+`<iframe height=498 width=510 src="">`
+
+`<audio id="audio" controls="" preload="none">
+      <source id="mp3" src="音频路径">
+</audio>`

@@ -3457,7 +3457,123 @@ v-html 不要用到用户提交的内容上。可能会导致 XSS 攻击。XSS �
         <div v-text-danger="msg"></div>
         用户名：<input type="text" v-bind:value="username">
         <!-- 
+            需要一个指令，可以和v-bind指令完成相同的<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自定义指令</title>
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <div id="app">
+        <h1>自定义指令</h1>
+        <div v-text="msg"></div>
+        <div v-text-danger="msg"></div>
+        用户名：<input type="text" v-bind:value="username">
+        <!-- 
             需要一个指令，可以和v-bind指令完成相同的功能，同时将该元素的父级元素的背景色设置为蓝色。
+         -->
+        <div>
+            用户名：<input type="text" v-bind-blue="username">
+        </div>
+    </div>
+
+    <div id="app2">
+        <div v-text-danger="msg"></div>
+        <div>
+            用户名：<input type="text" v-bind-blue="username">
+        </div>
+    </div>
+
+    <script>
+        // 定义全局的指令
+        // 函数式自定义指令
+        Vue.directive('text-danger', function(element, binding){
+            //对于自定义指令来说，函数体当中的this是window，而不是vue实例。
+            console.log(this)
+            element.innerText = binding.value
+            element.style.color = 'red'
+        })
+
+        // 定义全局的指令
+        // 对象式自定义指令
+        Vue.directive('bind-blue', {
+            bind(element, binding){
+                element.value = binding.value
+                console.log(this)
+            },
+            inserted(element, binding){
+                element.parentNode.style.backgroundColor = 'skyblue'
+                console.log(this)
+            },
+            update(element, binding){
+                element.value = binding.value
+                console.log(this)
+            }
+        })
+
+        const vm2 = new Vue({
+            el : '#app2',
+            data : {
+                msg : '欢迎学习Vue框架！',
+                username : 'lucy'
+            }
+        })
+
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                msg : '自定义指令',
+                username : 'jackson'
+            },
+            directives : {//局部自定义指令
+                // 指令1
+                // 指令2
+                // ...
+                // 关于指令的名字：1. v- 不需要写。 2. Vue官方建议指令的名字要全部小写。如果是多个单词的话，请使用 - 进行衔接。
+                // 这个回调函数有两个参数：第一个参数是真实的dom元素。 第二个参数是标签与指令之间绑定关系的对象。
+
+                // 这个回调函数的执行时机包括两个：第一个：标签和指令第一次绑定的时候。第二个：模板被重新解析的时候。
+                // 函数式自定义指令
+                /* 'text-danger' : function(element, binding){
+                    console.log('@')
+                    element.innerText = binding.value
+                    element.style.color = 'red'
+                }, */
+                /* 'bind-blue' : function(element, binding){
+                    element.value = binding.value
+                    console.log(element)
+                    // 为什么是null，原因是这个函数在执行的时候，指令和元素完成了绑定，但是只是在内存当中完成了绑定，元素还没有被插入到页面当中。
+                    console.log(element.parentNode)//null
+                    element.parentNode.style.backgroundColor = 'blue'//报错
+                }, */
+
+                // 局部对象式自定义指令 更加细致
+                /* 'bind-blue' : {
+                    // 这个对象中三个方法的名字不能随便写。
+                    // 这三个函数将来都会被自动调用。
+                    // 注意：在特定的时间节点调用特定的函数，这种被调用的函数称为钩子函数。
+
+                    // 元素与指令初次绑定的时候，自动调用bind
+                    bind(element, binding){
+                        element.value = binding.value
+                    },
+                    // 元素被插入到页面之后，这个函数自动被调用。
+                    inserted(element, binding){
+                        element.parentNode.style.backgroundColor = 'blue'
+                    },
+                    // 当模板重新解析的时候，这个函数会被自动调用。
+                    update(element, binding){
+                        element.value = binding.value
+                    }
+                } */
+            }
+        })
+    </script>
+</body>
+</html>功能，同时将该元素的父级元素的背景色设置为蓝色。
          -->
         <div>
             用户名：<input type="text" v-bind-blue="username">
@@ -3560,23 +3676,1211 @@ v-html 不要用到用户提交的内容上。可能会导致 XSS 攻击。XSS �
 </html>
 ```
 
+### 2.28 响应式与数据劫持
+
+- 什么是**响应式**？
+  修改 data 后，页面自动改变/刷新。这就是响应式。就像我们在使用 excel 的时候，修改一个单元格中的数据，
+  其它单元格的数据会联动更新，这也是响应式。
+- Vue 的响应式是如何实现的？
+  **数据劫持**：Vue 底层使用了 Object.defineProperty，配置了 setter 方法，当去修改属性值时 setter 方法则被自
+  动调用，setter 方法中不仅修改了属性值，而且还做了其他的事情，例如：重新渲染页面。setter 方法就像半路劫
+  持一样，所以称为数据劫持。
+- Vue 会给 data 中所有的属性，以及属性中的属性，都会添加响应式。
+- 后期添加的属性，不会有响应式，怎么处理？
+  `Vue.set(目标对象, ‘属性名’, 值)`
+  `vm.$set(目标对象, ‘属性名’, 值)`
+- Vue 没有给数组下标 0,1,2,3....添加响应式，怎么处理？
+  - 调用 Vue 提供的 7 个 API：
+    `push()`
+    `pop()`
+    `reverse()`
+    `splice()`
+    `shift()`
+    `unshift()`
+    `sort()`
+  - 或者使用：
+    `Vue.set(数组对象, ‘index’, 值)`
+    `vm.$set(数组对象, ‘index’, 值)`
+
+`myvue.js`
+
+```js
+// 定义一个Vue类
+class Vue {
+    // 定义构造函数
+    // options是一个简单的纯粹的JS对象：{}
+    // options对象中有一个data配置项
+    constructor(options){
+        // 获取所有的属性名
+        Object.keys(options.data).forEach((propertyName, index) => {
+            //console.log(typeof propertyName, propertyName, index)
+            let firstChar = propertyName.charAt(0)
+            if(firstChar != '_' && firstChar != '$'){
+                Object.defineProperty(this, propertyName, {
+                    //数据代理
+                    get(){
+                        return options.data[propertyName]
+                    },
+                    //数据劫持
+                    set(val){
+                        //1. 修改内存中对象的属性值
+                        options.data[propertyName] = val
+                        //2. 重新渲染页面
+                        console.log('页面上的真实DOM元素更新了！！！')
+
+                    }
+                })
+            }
+        })
+        // 获取所有的方法名
+        Object.keys(options.methods).forEach((methodName, index) => {
+            // 给当前的Vue实例扩展一个方法
+            this[methodName] = options.methods[methodName]
+        })
+    }
+}
+
+```
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>响应式与数据劫持</title>
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <div id="app">
+        <h1>{{msg}}</h1>
+        <div>姓名：{{name}}</div>
+        <div>年龄：{{age}}岁</div>
+        <div>数字：{{a.b.c.e}}</div>
+        <div>邮箱：{{a.email}}</div>
+    </div>
+    <script>
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                msg : '响应式与数据劫持',
+                name : 'jackson',
+                age : 20,
+                a : {
+                    b : {
+                        c : {
+                            e : 1
+                        }
+                    }
+                }
+            }
+        })
+
+        // 测试：后期给Vue实例动态的追加的一些属性，会添加响应式处理吗？
+        // 目前来看，通过这种方式后期给vm追加的属性并没有添加响应式处理。
+        //vm.$data.a.email = 'jack@126.com'
+
+        // 如果你想给后期追加的属性添加响应式处理的话，调用以下两个方法都可以：
+        // Vue.set() 、 vm.$set() 但是添加响应式时不能给根(vm data)添加响应式属性
+        //Vue.set(目标对象, 属性名, 属性值)
+        //Vue.set(vm.$data.a, 'email', 'jack@126.com')
+        //Vue.set(vm.a, 'email', 'jack@123.com')
+        vm.$set(vm.a, 'email', 'jack@456.com')
+
+        // 避免在运行时向Vue实例或其根$data添加响应式
+        // 不能直接给vm / vm.$data 追加响应式属性。只能在声明时提前定义好。
+        //Vue.set(vm, 'x', '1')
+        //Vue.set(vm.$data, 'x', '1')
+
+    </script>
+</body>
+</html>
+```
+
+### 2.28 数组的响应式与数据劫持
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数组的响应式处理</title>
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <!-- 
+        1. 通过数组的下标去修改数组中的元素，默认情况下是没有添加响应式处理的。怎么解决？
+        
+        2. 第一种方案：
+            vm.$set(数组对象, 下标, 值)
+            Vue.set(数组对象, 下标, 值)
+
+        3. 第二种方案：
+            push()//向数组最后添加一个或多个元素，并返回新数组的长度。
+            pop()//移除数组的最后一个元素，并返回该元素的值。
+            reverse()//反转数组中的元素顺序。
+            splice()//在数组中添加或删除元素。
+               如果只传递了第一个参数 index，则会从该索引位置开始删除所有后续元素。
+               如果只传递了第一个参数 index 和第二个参数 deleteCount，则会从该索引位置开始删除指定数量的元素。
+               如果还传递了第三个参数 item1, item2, ...，则会在删除元素的位置添加这些元素。
+
+                    示例：
+
+                    let arr = [1, 2, 3, 4, 5];
+                    // 从索引位置2开始删除2个元素，再添加两个元素
+                    arr.splice(2, 2, 'a', 'b'); 
+                    console.log(arr); // [1, 2, 'a', 'b', 5]
+
+                    // 从索引位置1开始删除1个元素
+                    arr.splice(1, 1); 
+                    console.log(arr); // [1, 'a', 'b', 5]
+
+                    // 从索引位置0开始删除所有元素
+                    arr.splice(0); 
+                    console.log(arr); // []
+            shift()//移除数组的第一个元素，并返回该元素的值。
+            unshift()//在数组的开头添加一个或多个元素，并返回新数组的长度。
+            sort()//对数组中的元素进行排序。
+
+            在Vue当中，通过以上的7个方法来给数组添加响应式处理。
+     -->
+    <div id="app">
+        <h1>{{msg}}</h1>
+        <ul>
+            <li v-for="user in users">
+                {{user}}
+            </li>
+        </ul>
+        <ul>
+            <li v-for="vip in vips" :key="vip.id">
+                {{vip.name}}
+            </li>
+        </ul>
+    </div>
+    <script>
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                msg : '数组的响应式处理',
+                users : ['jack', 'lucy', 'james'],
+                vips : [
+                    {id:'111', name:'zhangsan'},
+                    {id:'222', name:'lisi'}
+                ]
+            }
+        })
+    </script>
+</body>
+</html>
+```
+
+### 2.29 Vue 的生命周期
+
+#### 2.29.1 Vue 生命周期
+
+Vue 的生命周期指的是：vm 对象从创建到最终销毁的整个过程。
+
+1. 虚拟 DOM 在内存中就绪时：去调用一个 a 函数
+2. 虚拟 DOM 转换成真实 DOM 渲染到页面时：去调用一个 b 函数
+3. Vue 的 data 发生改变时：去调用一个 c 函数
+4. ...... 
+5. Vue 实例被销毁时：去调用一个 x 函数
+
+在生命线上的函数叫做**钩子函数**，这些函数是不需要程序员手动调用的，由 Vue 自动调用，程序员只需要按照自己的需求写上，到了那个时间点自动就会执行。
+
+研究 Vue 的生命周期主要研究的核心是：在**哪个时刻**调用了**哪个钩子函数**
+
+####  2.29.2 Vue 生命周期的 4 个阶段 8 个钩子
+
+- Vue 的生命周期可以被划分为 4 个阶段：
+  初始阶段、挂载阶段、更新阶段、销毁阶段(或许叫解绑阶段更好)。
+
+- 每个阶段会调用两个钩子函数。
+
+- 两个钩子函数名的特点：`beforeXxx()`、`xxxed()`。
+
+- 8 个生命周期钩子函数分别是：
+
+  | 阶段     | 时间   | 方法              |
+  | -------- | ------ | ----------------- |
+  | 初始阶段 | 创建前 | `beforeCreate()`  |
+  | 初始阶段 | 创建后 | `created()`       |
+  | 挂载阶段 | 挂载前 | `beforeMount()`   |
+  | 挂载阶段 | 挂载后 | `mounted()`       |
+  | 更新阶段 | 更新前 | `beforeUpdate() ` |
+  | 更新阶段 | 更新后 | `updated()`       |
+  | 销毁阶段 | 销毁前 | `beforeDestroy()` |
+  | 销毁阶段 | 销毁后 | `destroyed() `    |
+
+- 8 个钩子函数写在哪里？直接写在 Vue 构造函数的 options 对象当中。
+
+- **初始阶段**做了这么几件事：
+
+   1. 创建 Vue 实例 vm（此时 Vue 实例已经完成了创建，这是生命的起点）
+   2. 初始化事件对象和生命周期（接产大夫正在给他洗澡）
+   3. 调用 beforeCreate()钩子函数（此时还无法通过 vm 去访问 data 对象的属性）
+   4. 初始化数据代理和数据监测
+   5. 调用 created()钩子函数（此时数据代理和数据监测创建完毕，已经可以通过 vm 访问 data 对象的属性）
+   6. 编译模板语句生成虚拟 DOM（此时虚拟 DOM 已经生成，但页面上还没有渲染）
+      该阶段适合做什么？
+      - `beforeCreate`：可以在此时加一些 loading 效果。
+      - `created`：结束 loading 效果。也可以在此时发送一些网络请求，获取数据。也可以在这里添加定时器。
+      - 等
+
+- **挂载阶段**做了什么事儿
+   做了这么几件事：
+
+   1. 调用 `beforeMount()`钩子函数（此时页面还未渲染，真实 DOM 还未 生成）
+   2. 给 vm 追加$el$ 属性，用它来代替”$el$”，$el $代表了真实的 DOM 元素（此时真实 DOM 生成，页面渲染完成）
+   3. 调用 mounted()钩子函数
+      该阶段适合做什么？
+      - `mounted`：可以操作页面的 DOM 元素了。	
+
+- 更新阶段做了什么事儿
+   做了这么几件事：
+
+   1. data 发生变化（这是该阶段开始的标志）
+   2. 调用` beforeUpdate()`钩子函数（此时只是内存中的数据发生变化，页面还未更新）
+   3. 虚拟 DOM 重新渲染和修补
+   4. 调用 updated()钩子函数（此时页面已更新）
+      该阶段适合做什么？
+      - `beforeUpdate`：适合在更新之前访问现有的 DOM，比如手动移除已添加的事件监听器。
+      - `updated`：页面更新后，如果想对数据做统一处理，可以在这里完成。
+
+- 销毁阶段做了什么事儿
+   做了这么几件事：
+
+   1. `vm.$destroy()`方法被调用（这是该阶段开始的标志）
+   2. 调用 `beforeDestroy()`钩子函数（此时 Vue 实例还在。虽然 vm 上的监视器、vm 上的子组件、vm 上的自定义事件监听器还在，但是它们都已经不能用了。此时修改 data 也不会重新渲染页面了）
+   3. 卸载子组件和监视器、解绑自定义事件监听器
+   4. 调用 destroyed()钩子函数（虽然 destroyed 翻译为已销毁，但此时 Vue 实例还在，空间并没有释放，只不过马上要释放了，这里的已销毁指的是 vm 对象上所有的东西都已经**解绑**完成了）
+      该阶段适合做什么？
+      - `beforeDestroy`：适合做销毁前的准备工作，和人临终前写遗嘱类似。例如：可以在这里清除定时器。
+
+- Vue 官方的生命周期图：
+  ![img](../MDImg/vue/2.29.1-1eg.png)
+
+- 翻译后的生命周期图：
+   <img src="../MDImg/vue/2.29.1-2eg.png" alt="img" style="zoom:150%;" />
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue的生命周期</title>
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <div id="app">
+        <h1>{{msg}}</h1>
+        <h3>计数器：{{counter}}</h3>
+        <h3 v-text="counter"></h3>
+        <button @click="add">点我加1</button>
+        <button @click="destroy">点我销毁</button>
+    </div>
+    <script>
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                msg : 'Vue生命周期',
+                counter : 1
+            },
+            methods: {
+                add(){
+                    console.log('add....')
+                    this.counter++
+                },
+                destroy(){
+                    // 销毁vm
+                    this.$destroy()
+                },
+                /* m(){
+                    console.log('m....')
+                } */
+            },
+            watch : {
+                counter(){
+                    console.log('counter被监视一次！')
+                }
+            },
+            /*
+            1.初始阶段
+                el有，template也有，最终编译template模板语句。
+                el有，template没有，最终编译el模板语句。
+                el没有的时候，需要手动调用 vm.$mount(el) 进行手动挂载，然后流程才能继续。此时如果template有，最终编译template模板语句。
+                el没有的时候，需要手动调用 vm.$mount(el) 进行手动挂载，然后流程才能继续。此时如果没有template，最终编译el模板语句。
+
+                结论：
+                    流程要想继续：el必须存在。
+                    el和template同时存在，优先选择template。如果没有template，才会选择el。
+            */
+            beforeCreate() {
+                // 创建前
+                // 创建前指的是：数据代理和数据监测的创建前。
+                // 此时还无法访问data当中的数据。包括methods也是无法访问的。
+                console.log('beforeCreate', this.counter)
+                // 调用methods报错了，不存在。
+                //this.m()
+            },
+            created() {
+                // 创建后
+                // 创建后表示数据代理和数据监测创建完毕，可以访问data中的数据了。
+                console.log('created', this.counter)
+                // 可以访问methods了。
+                //this.m()
+            },
+            // 2.挂载阶段
+            beforeMount() {
+                // 挂载前
+                console.log('beforeMount')
+            },
+            mounted() {
+                // 挂载后
+                console.log('mounted')
+                console.log(this.$el)
+                console.log(this.$el instanceof HTMLElement)
+            },
+            // 3.更新阶段
+            beforeUpdate() {
+                // 更新前
+                console.log('beforeUpdate')
+            },
+            updated() {
+                // 更新后
+                console.log('updated')
+            },
+            // 4.销毁阶段(或许叫解绑阶段更好) 销毁前后的方法用途差不多
+            beforeDestroy() {
+                // 销毁前
+                console.log('beforeDestroy')
+                console.log(this)
+                this.counter = 1000//虽然仍与监听器处于绑定关系，但是监听器已不再工作 这个改动也不会重新渲染
+            },
+            destroyed() {
+                // 销毁后 销毁后vm实例还在 只是把监视器、子组件、自定义事件监听器解绑了 并不释放vm内存空间
+                //高版本的不只移除自定义的事件监听器，自带的事件监听器也会移除
+
+                console.log('destroyed')
+                console.log(this)
+            },
+        })
+    </script>
+</body>
+</html>
+```
+
+## 3. Vue 组件化
+
+### 3.1 什么是组件
+
+传统方式开发的应用
+一个网页通常包括三部分：结构（HTML）、样式（CSS）、交互（JavaScript）
+
+<img src="../MDImg/vue/3.1-1eg.png" alt="img" style="zoom:150%;" />
+
+传统应用存在的问题：
+
+1. 关系纵横交织，复杂，牵一发动全身，不利于维 护。
+2. 代码虽然复用，但复用率不高。
+
+---
+
+组件化方式开发的应用
+
+<img src="../MDImg/vue/3.1-2eg.png" alt="img" style="zoom:150%;" />
+
+使用组件化方式开发解决了以上的两个问题：
+
+1. 每一个组件都有独立的 js，独立的 css，这些独立的 js 和 css 只供当前组件使用，不存在纵横交错。更加便于维护。
+2. 代码复用性增强。组件不仅让 js css 复用了，HTML 代码片段也复用了（因为要使用组件直接引入组件即可）。
+
+什么是组件？
+
+1. 组件：**实现应用中局部功能的代码和资源的集合**。凡是采用组件方式开发的应用都可以称为组件化应用。
+2. 模块：一个大的 js 文件按照模块化拆分规则进行拆分，生成多个 js 文件，每一个 js 文件叫做模块。凡是采用模块方式开发的应用都可以称为模块化应用。
+3. 任何一个组件中都可以包含这些资源：HTML CSS JS 图片 声音 视频等。从这个角度也可以说明组件是可以包括模块的。
+4. 组件的划分粒度很重要，粒度太粗会影响复用性。为了让复用性更强，Vue 的组件也支持父子组件嵌套使用。
+
+<img src="../MDImg/vue/3.1-3eg.png" alt="img" style="zoom:150%;" />
+
+子组件由父组件来管理，父组件由父组件的父组件管理。在 Vue 中根组件就是 vm。因此每一个组件也是一个 Vue 实例
+
+### 3.2 第一个组件
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第一个组件</title>
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <!-- 
+        组件的使用分为三步：
+            第一步：创建组件
+                Vue.extend({该配置项和new Vue的配置项几乎相同，略有差别})
+                区别有哪些？
+                    1. 创建Vue组件的时候，配置项中不能使用el配置项。（但是需要使用template配置项来配置模板语句。）
+                    2. 配置项中的data不能使用直接对象的形式，必须使用function。
+            第二步：注册组件
+                局部注册：
+                    在配置项当中使用components，语法格式：
+                        components : {
+                            组件的名字 : 组件对象
+                        }
+                全局注册：
+                    Vue.component('组件的名字', 组件对象)
+            第三步：使用组件
+        
+        小细节：
+            1. 在Vue当中是可以使用自闭合标签的，但是前提必须在脚手架环境中使用。
+            2. 在创建组件的时候Vue.extend()可以省略，但是底层实际上还是会调用的，在注册组件的时候会调用。
+            3. 组件的名字
+                第一种：全部小写
+                第二种：首字母大写，后面都是小写
+                第三种：kebab-case命名法（串式命名法。例如：user-login）
+                第四种：CamelCase命名法（驼峰式命名法。例如：UserLogin），但是这种方式只允许在脚手架环境中使用。
+                不要使用HTML内置的标签名作为组件的名字。
+                在创建组件的时候，通过配置项配置一个name，这个name不是组件的名字，是设置Vue开发者工具中显示的组件的名字。
+     -->
+    <div id="app">
+        <h1>{{msg}}</h1>
+        <!-- 3. 使用组件 -->
+        <userlogin></userlogin>
+        <userlist></userlist>
+        <userlist></userlist>
+        <userlist></userlist>
+        <userlogin></userlogin>
+
+        <!-- <userlogin/> -->
+    </div>
+
+    <div id="app2">
+        <userlogin></userlogin>
+        <hello-world></hello-world>
+        <!-- <form></form> -->
+    </div>
+
+    <script>
+
+        /* // 创建组件
+        const abc = {
+            template : `<h1>测试组件的名字????</h1>`
+        }
+
+        // 全局注册组件
+        Vue.component('HelloWorld', abc) */
+
+
+        Vue.component('hello-world', {
+            name : 'Xxxxx',
+            template : `<h1>测试组件的名字%%%%%</h1>`
+        })
+
+        /* Vue.component('form', {
+            template : `<h1>测试组件的名字%%%%%</h1>`
+        }) */
+
+        // 1.创建组件(结构HTML 交互JS 样式CSS)
+        /* const myComponent = Vue.extend({
+            template : `
+            <ul>
+                <li v-for="(user,index) of users" :key="user.id">
+                    {{index}},{{user.name}}
+                </li>
+            </ul>
+            `,
+            data(){
+                return {
+                    users : [
+                        {id:'001',name:'jack'},
+                        {id:'002',name:'lucy'},
+                        {id:'003',name:'james'}
+                    ]
+                }
+            }
+        }) */
+
+        const myComponent = {
+            template : `
+            <ul>
+                <li v-for="(user,index) of users" :key="user.id">
+                    {{index}},{{user.name}}
+                </li>
+            </ul>
+            `,
+            data(){
+                return {
+                    users : [
+                        {id:'001',name:'jack'},
+                        {id:'002',name:'lucy'},
+                        {id:'003',name:'james'}
+                    ]
+                }
+            }
+        }
+
+        // 1. 创建组件
+        /* const userLoginComponent = Vue.extend({
+            template : `
+            <div>
+                <h3>用户登录</h3>
+                <form @submit.prevent="login">
+                    账号：<input type="text" v-model="username"> <br><br>
+                    密码：<input type="password" v-model="password"> <br><br>
+                    <button>登录</button>
+                </form>
+            </div>
+            `,
+            data(){
+                return {
+                    username : '',
+                    password : ''
+                }
+            },
+            methods: {
+                login(){
+                    alert(this.username + "," + this.password)
+                }
+            },
+        }) */
+
+        const userLoginComponent = {
+            template : `
+            <div>
+                <h3>用户登录</h3>
+                <form @submit.prevent="login">
+                    账号：<input type="text" v-model="username"> <br><br>
+                    密码：<input type="password" v-model="password"> <br><br>
+                    <button>登录</button>
+                </form>
+            </div>
+            `,
+            data(){
+                return {
+                    username : '',
+                    password : ''
+                }
+            },
+            methods: {
+                login(){
+                    alert(this.username + "," + this.password)
+                }
+            },
+        }
+
+        // 全局注册
+        Vue.component('userlogin', userLoginComponent)
+
+        const vm2 = new Vue({
+            el : '#app2'
+        })
+
+        // Vue实例
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                msg : '第一个组件'
+            },
+            // 2. 注册组件（局部注册）
+            components : {
+                // userlist是组件的名字。myComponent只是一个变量名。
+                userlist : myComponent,
+                //userlogin : userLoginComponent
+            }
+        })
+
+        /* let data = {
+            counter : 1
+        } */
+
+        function data(){
+            return {
+                counter : 1
+            }
+        }
+
+        let x = data();
+        let y = data();
+
+    </script>
+</body>
+</html>
+```
+
+### 3.3 组件的嵌套
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>组件嵌套</title>
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+    <script>
+        // 创建Y1组件
+        const y1 = {
+            template : `
+                <div>
+                    <h3>Y1组件</h3>
+                </div>
+            `
+        }
+        // 创建X1组件
+        const x1 = {
+            template : `
+                <div>
+                    <h3>X1组件</h3>
+                </div>
+            `
+        }
+        // 创建Y组件
+        const y = {
+            template : `
+                <div>
+                    <h2>Y组件</h2>
+                    <y1></y1>
+                </div>
+            `,
+            components : {y1 : y1}/* 可省略为y1 */
+        }
+        // 创建X组件
+        const x = {
+            template : `
+                <div>
+                    <h2>X组件</h2>
+                    <x1></x1>
+                </div>
+            `,
+            components : {x1}
+        }
+        // 创建app组件
+        const app = {
+            template : `
+                <div>
+                    <h1>App组件</h1>
+                    <x></x>
+                    <y></y>
+                </div>
+            `,
+            // 注册X组件
+            components : {x,y}
+        }
+        // vm
+        const vm = new Vue({
+            el : '#root',
+            template : `
+                <app></app>
+            `,
+            // 注册app组件
+            components : {app}
+        })
+    </script>
+</body>
+</html>
+```
+
+### 3.4 VueComponent & Vue
+
+#### 3.4.1 this
+
+<iframe src="//player.bilibili.com/player.html?aid=226837727&bvid=BV17h41137i4&cid=1077694679&page=66" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+
+`new Vue({})`配置项中的 `this `和` Vue.extend({})`配置项中的 `this `他们分别是谁？
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>vm与vc</title>
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <div id="app">
+        <h1>{{msg}}</h1>
+        <user></user>
+        <user></user>
+        <user></user>
+    </div>
+    <script>
+
+        // 这个不是给Vue扩展counter属性。
+        // 这个是给“Vue的原型对象”扩展一个counter属性。
+        Vue.prototype.counter = 1000
+
+        // 创建组件
+        const user = Vue.extend({
+            template : `
+            <div>
+                <h1>user组件</h1>
+            </div>
+            `,
+            mounted(){/* 生命周期钩子函数 */
+                // this是VueComponent实例
+                // user是什么呢？？？？是一个全新的构造函数 VueComponent构造函数。
+                //console.log('vc', this === user)
+                // 为什么要这样设计？为了代码复用。
+                // 底层实现原理：
+                // VueComponent.prototype.__proto__ = Vue.prototype
+                console.log('vc.counter', this.counter)
+                // 这个访问不了，因为msg是vm实例上的属性。
+                //console.log('vc.msg', this.msg)
+            }
+        })
+
+        console.log('user.prototype.__proto__ === Vue.prototype' , user.prototype.__proto__ === Vue.prototype)
+
+        console.log(user)
+
+        // vm
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                msg : 'vm与vc'
+            },
+            components : {/* 注册组件 */
+                user
+            },
+            mounted() {
+                // this是Vue实例
+                console.log('vm', this)
+            },
+        })
+
+        console.log('vm.counter', vm.counter)
+        // 本质上是这样的：
+        console.log('vm.counter', vm.__proto__.counter)
+
+        /* function test(){
+            var Sub = function User(){
+                this.name = 'admin'
+            }
+            return Sub
+        }
+
+        let a = test()
+        // 通过构造函数创建对象
+        console.log(new a()) */
+
+        /* console.log(a)
+        let b = test()
+        console.log(b)
+        console.log(a === b) */
+
+        // prototype __proto__
+        // 构造函数（函数本身又是一种类型，代表Vip类型）
+        function Vip(){}
+
+        // Vip类型/Vip构造函数，有一个 prototype 属性。
+        // 这个prototype属性可以称为：显式的原型属性。
+        // 通过这个显式的原型属性可以获取：原型对象
+        // 获取Vip的原型对象
+        let x = Vip.prototype
+
+        // 通过Vip可以创建实例
+        let a = new Vip()
+        /* let b = new Vip()
+        let c = new Vip() */
+        // 对于实例来说，都有一个隐式的原型属性: __proto__
+        // 注意：显式的(建议程序员使用的)。隐式的（不建议程序员使用的。）
+        // 这种方式也可以获取到Vip的原型对象
+        let y = a.__proto__
+        /* b.__proto__
+        c.__proto__ */
+
+        // 原型对象只有一个，其实原型对象都是共享的。
+        console.log(x === y) // true
+
+        // 这个不是给Vip扩展属性
+        // 是在给“Vip的原型对象”扩展属性
+        Vip.prototype.counter = 1000
+
+        // 通过a实例可以访问这个扩展的counter属性吗？可以访问。为什么？原理是啥？
+        // 访问原理：首先去a实例上找counter属性，如果a实例上没有counter属性的话，会沿着__proto__这个原型对象去找。
+        // 下面代码看起来表面上是a上有一个counter属性，实际上不是a实例上的属性，是a实例对应的原型对象上的属性counter。
+        console.log(a.counter)
+        //console.log(a.__proto__.counter)
+        
+
+    </script>
+</body>
+</html>
+```
+
+测试结果
+ <img src="../MDImg/vue/3.4-1eg.png" alt="img" style="zoom:150%;" />
+
+- new Vue({})配置项中的 this 就是：Vue 实例（vm）。
+- Vue.extend({})配置项中的 this 就是：VueComponent 实例（vc）。
+
+打开 vm 和 vc 你会发现，它们拥有大量相同的属性。例如：生命周期钩子、methods、watch 等。
+
+可以这么说：**vm上有的vc不一定有，vc有的vm一定有(vm包含vc)**
+
+#### 3.4.2 Vue.extend()方法做了什么？
+
+每一次的 extend 调用返回的都是一个全新的 VueComponent 函数。
+以下是 Vue.extend()的源码：
+
+<audio id="audio" controls="" preload="none">
+      <source id="mp3" src="../MDImg/vue/3.4-2eg.mp3">
+</audio>
+
+注意：是每一次都会返回一个全新的 VueComponent 构造函数。是全新的！！！
+构造函数有了，什么时候会调用构造函数来实例化 VueComponent 对象呢？
+
+```html
+<div id="app">
+    <mc></mc>
+</div>
+```
+
+Vue 在解析`<mc></mc>`时会创建一个 VueComponent 实例，也就是：new VueComponent()
+
+#### 3.4.3 通过 vc 可以访问 Vue 原型对象上的属性
+
+<iframe src="//player.bilibili.com/player.html?aid=226837727&bvid=BV17h41137i4&cid=1077694679&page=66" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+
+##### 3.4.3.1 回顾原型属性
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>vm与vc</title>
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <div id="app">
+        <h1>{{msg}}</h1>
+        <user></user>
+        <user></user>
+        <user></user>
+    </div>
+    <script>
+
+        // 这个不是给Vue扩展counter属性。
+        // 这个是给“Vue的原型对象”扩展一个counter属性。
+        Vue.prototype.counter = 1000
+
+        // 创建组件
+        const user = Vue.extend({
+            template : `
+            <div>
+                <h1>user组件</h1>
+            </div>
+            `,
+            mounted(){/* 生命周期钩子函数 */
+                // this是VueComponent实例
+                // user是什么呢？？？？是一个全新的构造函数 VueComponent构造函数。
+                //console.log('vc', this === user)
+                // 为什么要这样设计？为了代码复用。
+                // 底层实现原理：
+                // VueComponent.prototype.__proto__ = Vue.prototype
+                console.log('vc.counter', this.counter)
+                // 这个访问不了，因为msg是vm实例上的属性。
+                //console.log('vc.msg', this.msg)
+            }
+        })
+
+        console.log('user.prototype.__proto__ === Vue.prototype' , user.prototype.__proto__ === Vue.prototype)
+
+        console.log(user)
+
+        // vm
+        const vm = new Vue({
+            el : '#app',
+            data : {
+                msg : 'vm与vc'
+            },
+            components : {/* 注册组件 */
+                user
+            },
+            mounted() {
+                // this是Vue实例
+                console.log('vm', this)
+            },
+        })
+
+        console.log('vm.counter', vm.counter)
+        // 本质上是这样的：
+        console.log('vm.counter', vm.__proto__.counter)
+
+        /* function test(){
+            var Sub = function User(){
+                this.name = 'admin'
+            }
+            return Sub
+        }
+
+        let a = test()
+        // 通过构造函数创建对象
+        console.log(new a()) */
+
+        /* console.log(a)
+        let b = test()
+        console.log(b)
+        console.log(a === b) */
+
+        // prototype __proto__
+        // 构造函数（函数本身又是一种类型，代表Vip类型）
+        function Vip(){}
+
+        // Vip类型/Vip构造函数，有一个 prototype 属性。
+        // 这个prototype属性可以称为：显式的原型属性。
+        // 通过这个显式的原型属性可以获取：原型对象
+        // 获取Vip的原型对象
+        let x = Vip.prototype
+
+        // 通过Vip可以创建实例
+        let a = new Vip()
+        /* let b = new Vip()
+        let c = new Vip() */
+        
+        // 对于实例来说，都有一个隐式的原型属性: __proto__
+        // 注意：显式的(建议程序员使用的)。隐式的（不建议程序员使用的。）
+        // 这种方式也可以获取到Vip的原型对象
+        let y = a.__proto__
+        /* b.__proto__
+        c.__proto__ */
+
+        // 原型对象只有一个，其实原型对象都是共享的。
+        console.log(x === y) // true
+
+        // 这个不是给Vip扩展属性
+        // 是在给“Vip的原型对象”扩展属性
+        Vip.prototype.counter = 1000
+
+        // 通过a实例可以访问这个扩展的counter属性吗？可以访问。为什么？原理是啥？
+        // 访问原理：首先去a实例上找counter属性，如果a实例上没有counter属性的话，会沿着__proto__这个原型对象去找。
+        // 下面代码看起来表面上是a上有一个counter属性，实际上不是a实例上的属性，是a实例对应的原型对象上的属性counter。
+        console.log(a.counter)
+        //console.log(a.__proto__.counter)
+    </script>
+</body>
+</html>
+```
+
+<img src="../MDImg/vue/3.4.3-1eg.png" alt="img" style="zoom:150%;" />
+
+##### 3.4.3.2 原理剖析
+
+VueComponent.prototype.__proto__ = Vue.prototype
+
+<img src="../MDImg/vue/3.4.3.2-1eg.png" alt="img" style="zoom:150%;" />
+
+这样做的话，最终的结果就是：Vue、vm、VueComponent、vc 都共享了 Vue 的原型对象（并且这个 Vue 的原型对象只有一个）。
+
+### 3.5 单文件组件
+
+<iframe src="//player.bilibili.com/player.html?aid=226837727&bvid=BV17h41137i4&cid=1077691440&page=67" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+
+1. 什么是单文件组件？
+   - 一个文件对应一个组件（之前我们所学的是非单文件组件，一个 html 文件中定义了多个组件）
+   - 单文件组件的名字通常是：`x.vue`，这是 Vue 框架规定的，只有 Vue 框架能够认识，浏览器无法直接打开运行。需要 Vue 框架进行编译，将 x.vue 最终编译为浏览器能识别的 html js css。
+   - 单文件组件的文件名命名规范**和组件名的命名规范相同**：
+     1. 全部小写：userlist
+     2. 首字母大写，后面全部小写：Userlist
+     3. kebab-case 命名法：user-list
+     4. **CamelCase 命名法**：UserList（我们使用这种方式，和 Vue 开发者工具呼应。推荐使用）
+2. x.vue 文件的内容包括三块：
+   - 结构：`<template>HTML 代码</template>`
+   - 交互：`<script>JS 代码</script>`
+   - 样式：`<style>CSS 代码</style>`
+3. export 和 import，ES6 的模块化语法。
+   - 使用 export 导出（暴露）组件，在需要使用组件的 x.vue 文件中使用 import 导入组件
+     1. 默认导入和导出
+        1. export default {}
+        2. import 任意名称 from ‘模块标识符’
+     2.  按需导入和导出
+        1. export {a, b}
+        2. import {a, b} from ‘模块标识符’
+     3.  分别导出
+        export var name = ‘zhangsan’
+        export function sayHi(){}
+
+在`.vue`文件中写
+```vue
+<template></template>
+
+<script></script>
+
+<style></style>
+```
+
+---
+
+`index.html`
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>单文件组件</title>
+</head>
+<body>
+    <div id="root"></div>
+    <script src="../js/vue.js"></script>
+    <script src="./main.js"></script>
+</body>
+</html>
+```
+
+`main.js`
+
+```js
+
+import App from './App.vue'
+
+new Vue({
+    el : '#root',
+    // 使用组件
+    template : `<App></App>`,
+    // 注册App组件
+    components : {App}
+})
+```
 
 
 
+`App.vue`
 
+```vue
+<template>
+    <div>
+        <h1>App组件</h1>
+        <!-- 使用组件 -->
+        <X></X>
+        <Y></Y>
+    </div>
+</template>
 
+<script>
+    import X from './X.vue'
+    import Y from './Y.vue'
+    export default {
+        // 注册组件
+        components : {X, Y}
+    }
+</script>
+```
 
+`X1.vue`
 
+```vue
+<template>
+    <div>
+        <h3>X1组件</h3>
+    </div>
+</template>
 
+<script>
+    export default {
+    }
+</script>
+```
 
+`X.vue`
 
+```vue
+<template>
+    <div>
+        <h2>X组件</h2>
+        <!-- 使用组件 -->
+        <X1></X1>
+    </div>
+</template>
 
+<script>
+    import X1 from './X1.vue'
+    export default {
+        // 注册组件
+        components : {X1}
+    }
+</script>
+```
 
+`Y1.vue`
 
+```vue
+<template>
+    <div>
+        <h3>Y1组件</h3>
+    </div>
+</template>
 
+<script>
+    export default {
+    }
+</script>
+```
 
+`Y.vue`
 
+```vue
+<template>
+    <div>
+        <h2>Y组件</h2>
+        <!-- 使用组件 -->
+        <Y1></Y1>
+    </div>
+</template>
 
+<script>
+    // 导入组件Y1（Y1可以使用其它名字。）
+    import Y1 from './Y1.vue'
+    export default {
+        // 注册组件
+        components : {Y1}
+    }
+</script>
+```
 
+### 3.6 Vue 脚手架
 
+#### 3.6.1 确保 npm 能用（安装 Node.js）
 
+Node.js 的下载地址:
+https://nodejs.org/zh-cn/download/
+
+#### 3.6.2 Vue CLI（脚手架安装）
+
+1. Vue 的脚手架（Vue CLI: Command Line Interface）是 Vue 官方提供的标准化开发平台。它可以将我们.vue 的
+代码进行编译生成 html css js 代码，并且可以将这些代码自动发布到它自带的服务器上，为我们 Vue 的开发提供
+了一条龙服务。脚手架官网地址：https://cli.vuejs.org/zh
+注意：Vue CLI 4.x 需要 Node.js v8.9 及以上版本，推荐 v10 以上。
+2. 脚手架安装步骤：
+  1. 建议先配置一下 npm 镜像：
+     - npm config set registry https://registry.npm.taobao.org
+     - npm config get registry 返回成功，表示设置成功
+  2. 第一步：安装脚手架（全局方式：表示只需要做一次即可）
+     - npm install -g @vue/cli
+     - 安装完成后，重新打开 DOS 命令窗口，输入 vue 命令可用表示成功了
+  3. 第二步：创建项目（项目中自带脚手架环境，自带一个 HelloWorld 案例）
+     1. 切换到要创建项目的目录，然后使用 vue create vue_pro
+        这里选择 Vue2，
+        babel：负责 ES6 语法转换成 ES5。
+        eslint：负责语法检查的。
+        回车之后，就开始创建项目，创建脚手架环境（内置了 webpack loader），自动生成 HelloWorld 案例。
+  4. 第三步：编译 Vue 程序，自动将生成 html css js 放入内置服务器，自动启动服务。
+     1. dos 命令窗口中切换到项目根：cd vue_pro
+     2. 执行：npm run serve，这一步会编译 HelloWorld 案例
+        ctrl + c 停止服务。
+     3. 打开浏览器，访问：http://localhost:8080
