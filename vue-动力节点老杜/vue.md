@@ -4396,7 +4396,7 @@ Vue 的生命周期指的是：vm 对象从创建到最终销毁的整个过程�
 
 #### 3.4.1 this
 
-<iframe src="//player.bilibili.com/player.html?aid=226837727&bvid=BV17h41137i4&cid=1077694679&page=66" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+<iframe src="//player.bilibili.com/player.html?aid=226837727&bvid=BV17h41137i4&cid=1077694679&page=66&autoplay=false" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" > </iframe>
 
 `new Vue({})`配置项中的 `this `和` Vue.extend({})`配置项中的 `this `他们分别是谁？
 
@@ -4552,7 +4552,7 @@ Vue 在解析`<mc></mc>`时会创建一个 VueComponent 实例，也就是：new
 
 #### 3.4.3 通过 vc 可以访问 Vue 原型对象上的属性
 
-<iframe src="//player.bilibili.com/player.html?aid=226837727&bvid=BV17h41137i4&cid=1077694679&page=66" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+<iframe src="//player.bilibili.com/player.html?aid=226837727&bvid=BV17h41137i4&cid=1077694679&page=66&autoplay=false" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
 
 ##### 3.4.3.1 回顾原型属性
 
@@ -4687,7 +4687,7 @@ VueComponent.prototype.__proto__ = Vue.prototype
 
 ### 3.5 单文件组件
 
-<iframe src="//player.bilibili.com/player.html?aid=226837727&bvid=BV17h41137i4&cid=1077691440&page=67" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+<iframe src="//player.bilibili.com/player.html?aid=226837727&bvid=BV17h41137i4&cid=1077691440&page=67&autoplay=false" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
 
 1. 什么是单文件组件？
    - 一个文件对应一个组件（之前我们所学的是非单文件组件，一个 html 文件中定义了多个组件）
