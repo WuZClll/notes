@@ -4855,6 +4855,8 @@ new Vue({
 
 ### 3.6 Vue 脚手架
 
+<iframe src="//player.bilibili.com/player.html?aid=226837727&bvid=BV17h41137i4&cid=1077692548&page=69&autoplay=false" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+
 #### 3.6.1 确保 npm 能用（安装 Node.js）
 
 Node.js 的下载地址:
@@ -4864,23 +4866,33 @@ https://nodejs.org/zh-cn/download/
 
 1. Vue 的脚手架（Vue CLI: Command Line Interface）是 Vue 官方提供的标准化开发平台。它可以将我们.vue 的
 代码进行编译生成 html css js 代码，并且可以将这些代码自动发布到它自带的服务器上，为我们 Vue 的开发提供
-了一条龙服务。脚手架官网地址：https://cli.vuejs.org/zh
+了一条龙服务。脚手架官网地址：`https://cli.vuejs.org/zh`
 注意：Vue CLI 4.x 需要 Node.js v8.9 及以上版本，推荐 v10 以上。
 2. 脚手架安装步骤：
   1. 建议先配置一下 npm 镜像：
-     - npm config set registry https://registry.npm.taobao.org
-     - npm config get registry 返回成功，表示设置成功
+     - `npm config set registry https://registry.npm.taobao.org`
+     - `npm config get registry` 返回成功，表示设置成功
   2. 第一步：安装脚手架（全局方式：表示只需要做一次即可）
-     - npm install -g @vue/cli
-     - 安装完成后，重新打开 DOS 命令窗口，输入 vue 命令可用表示成功了
+     - `npm install -g @vue/cli`
+     - 安装完成后，重新打开 DOS 命令窗口，输入 `vue `命令可用表示成功了
   3. 第二步：创建项目（项目中自带脚手架环境，自带一个 HelloWorld 案例）
-     1. 切换到要创建项目的目录，然后使用 vue create vue_pro
-        这里选择 Vue2，
-        babel：负责 ES6 语法转换成 ES5。
-        eslint：负责语法检查的。
+     1. 切换到要创建项目的目录，然后使用` vue create vue_pro`
+        这里选择 `Vue2`，
+        `babel`：负责 ES6 语法转换成 ES5。
+        `eslint`：负责语法检查的。
         回车之后，就开始创建项目，创建脚手架环境（内置了 webpack loader），自动生成 HelloWorld 案例。
   4. 第三步：编译 Vue 程序，自动将生成 html css js 放入内置服务器，自动启动服务。
-     1. dos 命令窗口中切换到项目根：cd vue_pro
-     2. 执行：npm run serve，这一步会编译 HelloWorld 案例
-        ctrl + c 停止服务。
+     1. dos 命令窗口中切换到项目根：`cd vue_pro`
+     2. 执行：`npm run serve`，这一步会编译 HelloWorld 案例
+        `ctrl + c `停止服务。
      3. 打开浏览器，访问：http://localhost:8080
+
+#### 3.6.3 认识脚手架结构
+
+<img src="../MDImg/vue/3.6.3脚手架结构.png" alt="img" style="zoom:100%;" />
+
+package.json：包的说明书（包的名字，包的版本，依赖哪些库）。该文件里有 webpack 的短命令：
+
+- `serve`（启动内置服务器）
+- `build` 命令是最后一次的编译，生成 html css js，给后端人员
+- `lint `做语法检查的。
